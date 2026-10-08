@@ -33,12 +33,12 @@ const Header = () => {
                             />
 
                             <span className="absolute mt-1 text-[13px] font-extrabold text-white">
-                                S.
+                                D.
                             </span>
                         </div>
 
                         <span className="text-[28px] font-extrabold tracking-[-1.4px] text-[#3474f5]">
-                            Storify
+                            Devify
                         </span>
                     </Link>
 
@@ -92,22 +92,22 @@ const Header = () => {
                     {/* Header Actions */}
                     <div className="ml-[135px] flex shrink-0 items-center gap-[20px]">
 
-                       
-                       <div className="group relative flex items-center">
-    <button
-        type="button"
-        className="flex items-center justify-center text-[#252d38] transition hover:text-[#3f73f7]"
-        aria-label="Account"
-    >
-        <UserRound size={20} strokeWidth={1.8} />
-    </button>
 
-    {/* Hover Bridge */}
-    <div className="absolute right-[-28px] top-full h-[20px] w-[90px]" />
+                        <div className="group relative flex items-center">
+                            <button
+                                type="button"
+                                className="flex items-center justify-center text-[#252d38] transition hover:text-[#3f73f7]"
+                                aria-label="Account"
+                            >
+                                <UserRound size={20} strokeWidth={1.8} />
+                            </button>
 
-    {/* Account Dropdown */}
-    <div
-        className="
+                            {/* Hover Bridge */}
+                            <div className="absolute right-[-28px] top-full h-[20px] w-[90px]" />
+
+                            {/* Account Dropdown */}
+                            <div
+                                className="
             invisible absolute right-[-28px] top-[38px] z-[100]
             w-[320px]
             translate-y-2
@@ -122,11 +122,11 @@ const Header = () => {
             group-hover:translate-y-0
             group-hover:opacity-100
         "
-    >
-        {/* Sign In */}
-        <Link
-            to="/login"
-            className="
+                            >
+                                {/* Sign In */}
+                                <Link
+                                    to="/login"
+                                    className="
                 flex h-[42px] w-full
                 items-center justify-center
                 rounded-full
@@ -136,14 +136,14 @@ const Header = () => {
                 transition
                 hover:bg-[#2862c4]
             "
-        >
-            Sign in
-        </Link>
+                                >
+                                    Sign in
+                                </Link>
 
-        {/* Register */}
-        <Link
-            to="/register"
-            className="
+                                {/* Register */}
+                                <Link
+                                    to="/register"
+                                    className="
                 flex h-[50px]
                 items-center justify-center
                 text-[16px]
@@ -152,18 +152,18 @@ const Header = () => {
                 transition
                 hover:text-[#2f6ed7]
             "
-        >
-            Register
-        </Link>
+                                >
+                                    Register
+                                </Link>
 
-        {/* Divider */}
-        <div className="h-px w-full bg-[#d9d9d9]" />
+                                {/* Divider */}
+                                <div className="h-px w-full bg-[#d9d9d9]" />
 
-        {/* Menu */}
-        <div className="pt-[12px]">
-            <Link
-                to="/account"
-                className="
+                                {/* Menu */}
+                                <div className="pt-[12px]">
+                                    <Link
+                                        to="/account"
+                                        className="
                     flex h-[43px]
                     items-center gap-[11px]
                     rounded-lg px-[10px]
@@ -173,18 +173,18 @@ const Header = () => {
                     hover:bg-white
                     hover:text-[#2f6ed7]
                 "
-            >
-                <LayoutDashboard
-                    size={18}
-                    strokeWidth={1.7}
-                />
+                                    >
+                                        <LayoutDashboard
+                                            size={18}
+                                            strokeWidth={1.7}
+                                        />
 
-                Dashboard
-            </Link>
+                                        Dashboard
+                                    </Link>
 
-            <Link
-                to="/account/orders"
-                className="
+                                    <Link
+                                        to="/account/orders"
+                                        className="
                     flex h-[43px]
                     items-center gap-[11px]
                     rounded-lg px-[10px]
@@ -194,18 +194,18 @@ const Header = () => {
                     hover:bg-white
                     hover:text-[#2f6ed7]
                 "
-            >
-                <Package
-                    size={18}
-                    strokeWidth={1.7}
-                />
+                                    >
+                                        <Package
+                                            size={18}
+                                            strokeWidth={1.7}
+                                        />
 
-                My Orders
-            </Link>
+                                        My Orders
+                                    </Link>
 
-            <Link
-                to="/wishlist"
-                className="
+                                    <Link
+                                        to="/wishlist"
+                                        className="
                     flex h-[43px]
                     items-center gap-[11px]
                     rounded-lg px-[10px]
@@ -215,18 +215,18 @@ const Header = () => {
                     hover:bg-white
                     hover:text-[#2f6ed7]
                 "
-            >
-                <Heart
-                    size={18}
-                    strokeWidth={1.7}
-                />
+                                    >
+                                        <Heart
+                                            size={18}
+                                            strokeWidth={1.7}
+                                        />
 
-                Wishlist
-            </Link>
+                                        Wishlist
+                                    </Link>
 
-            <Link
-                to="/account/profile"
-                className="
+                                    <Link
+                                        to="/account/profile"
+                                        className="
                     flex h-[43px]
                     items-center gap-[11px]
                     rounded-lg px-[10px]
@@ -236,17 +236,17 @@ const Header = () => {
                     hover:bg-white
                     hover:text-[#2f6ed7]
                 "
-            >
-                <UserRound
-                    size={18}
-                    strokeWidth={1.7}
-                />
+                                    >
+                                        <UserRound
+                                            size={18}
+                                            strokeWidth={1.7}
+                                        />
 
-                Profile
-            </Link>
-        </div>
-    </div>
-</div>
+                                        Profile
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
 
 
                         <button

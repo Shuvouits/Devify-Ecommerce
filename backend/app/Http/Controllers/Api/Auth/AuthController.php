@@ -22,19 +22,17 @@ class AuthController extends Controller
     }
 
     public function register(RegisterRequest $request): JsonResponse
-    {
-        $user = $this->authService->registerCustomer(
-            $request->validated()
-        );
+{
+    $data = $this->authService->registerCustomer(
+        $request->validated()
+    );
 
-        return $this->successResponse(
-            [
-                'user' => $user,
-            ],
-            'Account created successfully.',
-            201
-        );
-    }
+    return $this->successResponse(
+        $data,
+        'Account created successfully.',
+        201
+    );
+}
 
     public function login(LoginRequest $request): JsonResponse
     {

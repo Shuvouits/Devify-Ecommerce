@@ -16,15 +16,24 @@ class AuthService
         protected AuthRepositoryInterface $authRepository
     ) {}
 
-    public function registerCustomer(array $data): User
-    {
-        $data['role'] = User::ROLE_CUSTOMER;
-        $data['status'] = User::STATUS_ACTIVE;
+   public function registerCustomer(array $data): array
+{
+    $data['role'] = User::ROLE_CUSTOMER;
+    $data['status'] = User::STATUS_ACTIVE;
 
-        unset($data['password_confirmation']);
+    unset($data['password_confirmation']);
 
-        return $this->authRepository->create($data);
-    }
+    $user = $this->authRepository->create($data);
+
+    $token = auth('api')->login($user);
+
+    return [
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'expires_in' => auth('api')->factory()->getTTL() * 60,
+        'user' => $user,
+    ];
+}
 
     public function login(array $credentials): array
     {
@@ -113,44 +122,42 @@ class AuthService
 
 
     public function resetPassword(array $data): void
-{
-    $status = Password::reset(
-        [
-            'email' => $data['email'],
-            'password' => $data['password'],
-            'password_confirmation' => $data['password_confirmation'],
-            'token' => $data['token'],
-        ],
-        function (User $user, string $password) {
-            $this->authRepository->update(
-                $user,
-                [
-                    'password' => $password,
-                ]
-            );
+    {
+        $status = Password::reset(
+            [
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'password_confirmation' => $data['password_confirmation'],
+                'token' => $data['token'],
+            ],
+            function (User $user, string $password) {
+                $this->authRepository->update(
+                    $user,
+                    [
+                        'password' => $password,
+                    ]
+                );
 
-            event(new PasswordReset($user));
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return;
         }
-    );
 
-    if ($status === Password::PASSWORD_RESET) {
-        return;
-    }
+        if ($status === Password::INVALID_TOKEN) {
+            throw ValidationException::withMessages([
+                'token' => [
+                    'The password reset link is invalid or has expired.',
+                ],
+            ]);
+        }
 
-    if ($status === Password::INVALID_TOKEN) {
         throw ValidationException::withMessages([
-            'token' => [
-                'The password reset link is invalid or has expired.',
+            'email' => [
+                'Unable to reset password. Please request a new reset link.',
             ],
         ]);
     }
-
-    throw ValidationException::withMessages([
-        'email' => [
-            'Unable to reset password. Please request a new reset link.',
-        ],
-    ]);
-}
-
-
 }

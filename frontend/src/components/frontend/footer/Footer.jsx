@@ -30,12 +30,12 @@ const Footer = () => {
                             />
 
                             <span className="absolute mt-1 text-[13px] font-extrabold text-white">
-                                S.
+                                D.
                             </span>
                         </div>
 
                         <span className="text-[28px] font-extrabold tracking-[-1.4px] text-[#3474f5]">
-                            Storify
+                            Devify
                         </span>
                     </Link>
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,24 +14,56 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+
     ->withMiddleware(function (Middleware $middleware): void {
+
+        /*
+        |--------------------------------------------------------------------------
+        | API Authentication Redirect
+        |--------------------------------------------------------------------------
+        */
+
         $middleware->redirectGuestsTo(
             fn (Request $request) => null
         );
-    })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (
-            AuthenticationException $exception,
-            Request $request
-        ) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthenticated.',
-                ], 401);
-            }
 
-            return null;
-        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Middleware Aliases
+        |--------------------------------------------------------------------------
+        */
+
+        $middleware->alias([
+            'role' => RoleMiddleware::class,
+        ]);
+
     })
+
+    ->withExceptions(function (Exceptions $exceptions): void {
+
+        /*
+        |--------------------------------------------------------------------------
+        | API Unauthenticated Response
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(
+            function (
+                AuthenticationException $exception,
+                Request $request
+            ) {
+                if ($request->is('api/*')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthenticated.',
+                    ], 401);
+                }
+
+                return null;
+            }
+        );
+
+    })
+
     ->create();
