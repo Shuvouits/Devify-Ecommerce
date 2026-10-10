@@ -48,6 +48,7 @@ const settingsItems = [
     {
         label: "OAuth / Social Login",
         icon: KeyRound,
+        path: "/admin/settings/social-login",
     },
     {
         label: "AI Configuration",

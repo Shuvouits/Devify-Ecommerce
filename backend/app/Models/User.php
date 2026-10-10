@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -71,5 +72,30 @@ class User extends Authenticatable implements JWTSubject
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+
+
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(
+            SocialAccount::class
+        );
+    }
+
+
+    public function getSocialAvatarUrl(): ?string
+    {
+        $this->loadMissing('socialAccounts');
+
+        $googleAccount =
+            $this->socialAccounts
+            ->firstWhere(
+                'provider',
+                'google'
+            );
+
+        return $googleAccount?->avatar_url;
     }
 }

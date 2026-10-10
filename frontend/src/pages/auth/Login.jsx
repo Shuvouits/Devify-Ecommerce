@@ -1,7 +1,9 @@
 import { useState } from "react";
+
 import {
     Link,
     useNavigate,
+    useSearchParams,
 } from "react-router-dom";
 
 import {
@@ -24,25 +26,72 @@ import {
 const Login = () => {
     const navigate = useNavigate();
 
-    const [showPassword, setShowPassword] = useState(false);
+    const [searchParams] =
+        useSearchParams();
 
-    const [formData, setFormData] = useState({
-        email: "",
-        password: "",
-    });
+    const [showPassword, setShowPassword] =
+        useState(false);
 
-    const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] =
+        useState({
+            email: "",
+            password: "",
+        });
+
+    const [errors, setErrors] =
+        useState({});
+
+    const [loading, setLoading] =
+        useState(false);
+
+    const [googleLoading, setGoogleLoading] =
+        useState(false);
 
 
     /*
     |--------------------------------------------------------------------------
-    | HANDLE INPUT CHANGE
+    | Social Login Error
+    |--------------------------------------------------------------------------
+    */
+
+    const socialError =
+        searchParams.get("social_error");
+
+
+    const socialErrorMessages = {
+        provider_unavailable:
+            "Google login is currently unavailable.",
+
+        authentication_failed:
+            "Google authentication failed. Please try again.",
+
+        exchange_failed:
+            "Unable to complete Google login. Please try again.",
+
+        expired:
+            "Your Google login session expired. Please try again.",
+    };
+
+
+    const socialLoginError =
+        socialError
+            ? socialErrorMessages[socialError] ||
+              "Unable to sign in with Google."
+            : null;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Handle Input Change
     |--------------------------------------------------------------------------
     */
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const {
+            name,
+            value,
+        } = e.target;
+
 
         setFormData((prev) => ({
             ...prev,
@@ -50,18 +99,13 @@ const Login = () => {
         }));
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | CLEAR FIELD ERROR
-        |--------------------------------------------------------------------------
-        */
-
         if (errors[name]) {
             setErrors((prev) => ({
                 ...prev,
                 [name]: null,
             }));
         }
+
 
         if (errors.general) {
             setErrors((prev) => ({
@@ -74,37 +118,45 @@ const Login = () => {
 
     /*
     |--------------------------------------------------------------------------
-    | LOGIN
+    | Normal Email / Password Login
     |--------------------------------------------------------------------------
     */
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+
+        if (loading) {
+            return;
+        }
+
+
         setLoading(true);
         setErrors({});
 
+
         try {
-            const response = await api.post(
-                "/auth/login",
-                {
-                    email: formData.email,
-                    password: formData.password,
-                }
-            );
+            const response =
+                await api.post(
+                    "/auth/login",
+                    {
+                        email:
+                            formData.email,
 
+                        password:
+                            formData.password,
+                    }
+                );
 
-            /*
-            |--------------------------------------------------------------------------
-            | GET AUTH DATA
-            |--------------------------------------------------------------------------
-            */
 
             const token =
-                response.data?.data?.access_token;
+                response.data?.data
+                    ?.access_token;
+
 
             const user =
-                response.data?.data?.user;
+                response.data?.data
+                    ?.user;
 
 
             if (!token || !user) {
@@ -116,7 +168,7 @@ const Login = () => {
 
             /*
             |--------------------------------------------------------------------------
-            | SAVE JWT + USER
+            | Save JWT + User
             |--------------------------------------------------------------------------
             */
 
@@ -128,12 +180,15 @@ const Login = () => {
 
             /*
             |--------------------------------------------------------------------------
-            | ROLE BASED REDIRECT
+            | Role Based Redirect
             |--------------------------------------------------------------------------
             */
 
             const dashboardPath =
-                getDashboardPath(user.role);
+                getDashboardPath(
+                    user.role
+                );
+
 
             navigate(
                 dashboardPath,
@@ -143,18 +198,22 @@ const Login = () => {
             );
 
         } catch (error) {
-
             /*
             |--------------------------------------------------------------------------
-            | VALIDATION / LOGIN ERROR
+            | Validation Error
             |--------------------------------------------------------------------------
             */
 
-            if (error.response?.status === 422) {
+            if (
+                error.response?.status ===
+                422
+            ) {
                 setErrors(
-                    error.response?.data?.errors || {
+                    error.response?.data
+                        ?.errors || {
                         general: [
-                            error.response?.data?.message ||
+                            error.response?.data
+                                ?.message ||
                             "Invalid email or password.",
                         ],
                     }
@@ -166,14 +225,18 @@ const Login = () => {
 
             /*
             |--------------------------------------------------------------------------
-            | UNAUTHORIZED
+            | Unauthorized
             |--------------------------------------------------------------------------
             */
 
-            if (error.response?.status === 401) {
+            if (
+                error.response?.status ===
+                401
+            ) {
                 setErrors({
                     general: [
-                        error.response?.data?.message ||
+                        error.response?.data
+                            ?.message ||
                         "Invalid email or password.",
                     ],
                 });
@@ -184,13 +247,14 @@ const Login = () => {
 
             /*
             |--------------------------------------------------------------------------
-            | OTHER ERROR
+            | Other Error
             |--------------------------------------------------------------------------
             */
 
             setErrors({
                 general: [
-                    error.response?.data?.message ||
+                    error.response?.data
+                        ?.message ||
                     error.message ||
                     "Something went wrong. Please try again.",
                 ],
@@ -202,13 +266,52 @@ const Login = () => {
     };
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Google Login
+    |--------------------------------------------------------------------------
+    */
+
+    const handleGoogleLogin = () => {
+        if (
+            googleLoading ||
+            loading
+        ) {
+            return;
+        }
+
+
+        setGoogleLoading(true);
+        setErrors({});
+
+
+        const apiBaseUrl =
+            import.meta.env
+                .VITE_API_BASE_URL ||
+            "http://127.0.0.1:8000/api";
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Full Browser Redirect
+        |--------------------------------------------------------------------------
+        |
+        | Axios use korbo na.
+        | User-ke Google OAuth screen-e niye jete hobe.
+        |
+        */
+
+        window.location.href =
+            `${apiBaseUrl}/auth/social/google/redirect`;
+    };
+
+
     return (
         <section className="w-full bg-white">
 
             <div className="mx-auto flex min-h-[640px] max-w-[1300px] justify-center px-4 pb-[34px] pt-[62px] xl:px-0">
 
                 <div className="h-fit w-full max-w-[398px] rounded-[18px] border border-[#dddddd] bg-white px-[27px] pb-[21px] pt-[23px] shadow-[0_10px_24px_rgba(0,0,0,0.09)]">
-
 
                     {/* Header */}
 
@@ -217,6 +320,7 @@ const Login = () => {
                         <h1 className="text-[27px] font-bold leading-[34px] tracking-[-0.6px] text-[#111111]">
                             Welcome back
                         </h1>
+
 
                         <p className="mt-[11px] text-[15px] font-normal text-[#656565]">
                             Sign in
@@ -229,7 +333,20 @@ const Login = () => {
 
                     {errors.general && (
                         <div className="mt-[18px] rounded-[9px] border border-[#f3c4c4] bg-[#fff5f5] px-[13px] py-[10px] text-center text-[12px] font-medium text-[#d13b3b]">
+
                             {errors.general[0]}
+
+                        </div>
+                    )}
+
+
+                    {/* Google Error */}
+
+                    {socialLoginError && (
+                        <div className="mt-[18px] rounded-[9px] border border-[#f3c4c4] bg-[#fff5f5] px-[13px] py-[10px] text-center text-[11px] font-medium leading-[17px] text-[#d13b3b]">
+
+                            {socialLoginError}
+
                         </div>
                     )}
 
@@ -238,13 +355,36 @@ const Login = () => {
 
                     <button
                         type="button"
-                        className="mt-[25px] flex h-[37px] w-full items-center justify-center gap-[10px] rounded-full border border-[#d9d9d9] bg-white text-[14px] font-medium text-[#171717] transition hover:bg-[#fafafa]"
+                        onClick={
+                            handleGoogleLogin
+                        }
+                        disabled={
+                            googleLoading ||
+                            loading
+                        }
+                        className="mt-[25px] flex h-[37px] w-full items-center justify-center gap-[10px] rounded-full border border-[#d9d9d9] bg-white text-[14px] font-medium text-[#171717] transition hover:bg-[#fafafa] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        <FcGoogle size={18} />
 
-                        <span>
-                            Continue with Google
-                        </span>
+                        {googleLoading ? (
+                            <>
+                                <span className="h-[15px] w-[15px] animate-spin rounded-full border-2 border-[#d8d8d8] border-t-[#286bd7]" />
+
+                                <span>
+                                    Connecting to Google...
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <FcGoogle
+                                    size={18}
+                                />
+
+                                <span>
+                                    Continue with Google
+                                </span>
+                            </>
+                        )}
+
                     </button>
 
 
@@ -266,7 +406,9 @@ const Login = () => {
                     {/* Form */}
 
                     <form
-                        onSubmit={handleSubmit}
+                        onSubmit={
+                            handleSubmit
+                        }
                         className="mt-[20px]"
                     >
 
@@ -280,6 +422,7 @@ const Login = () => {
                             >
                                 Email
                             </label>
+
 
                             <div
                                 className={`flex h-[37px] items-center rounded-full border bg-white px-[13px] ${
@@ -295,25 +438,35 @@ const Login = () => {
                                     className="mr-[10px] shrink-0 text-[#8c9399]"
                                 />
 
+
                                 <input
                                     id="email"
                                     name="email"
                                     type="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
+                                    value={
+                                        formData.email
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
                                     placeholder="name@example.com"
                                     autoComplete="email"
+                                    disabled={
+                                        loading ||
+                                        googleLoading
+                                    }
                                     className="h-full min-w-0 flex-1 border-0 bg-transparent text-[13px] text-[#313131] outline-none placeholder:text-[#7e8790]"
                                 />
 
                             </div>
 
 
-                            {/* Email Error */}
-
                             {errors.email && (
                                 <p className="mt-[5px] px-[4px] text-[11px] text-[#dc3f3f]">
-                                    {errors.email[0]}
+                                    {
+                                        errors
+                                            .email[0]
+                                    }
                                 </p>
                             )}
 
@@ -331,6 +484,7 @@ const Login = () => {
                                 Password
                             </label>
 
+
                             <div
                                 className={`flex h-[37px] items-center rounded-full border bg-white px-[13px] ${
                                     errors.password
@@ -345,6 +499,7 @@ const Login = () => {
                                     className="mr-[10px] shrink-0 text-[#8c9399]"
                                 />
 
+
                                 <input
                                     id="password"
                                     name="password"
@@ -353,12 +508,21 @@ const Login = () => {
                                             ? "text"
                                             : "password"
                                     }
-                                    value={formData.password}
-                                    onChange={handleChange}
+                                    value={
+                                        formData.password
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
                                     placeholder="••••••••"
                                     autoComplete="current-password"
+                                    disabled={
+                                        loading ||
+                                        googleLoading
+                                    }
                                     className="h-full min-w-0 flex-1 border-0 bg-transparent text-[13px] text-[#313131] outline-none placeholder:text-[#7e8790]"
                                 />
+
 
                                 <button
                                     type="button"
@@ -392,11 +556,12 @@ const Login = () => {
                             </div>
 
 
-                            {/* Password Error */}
-
                             {errors.password && (
                                 <p className="mt-[5px] px-[4px] text-[11px] text-[#dc3f3f]">
-                                    {errors.password[0]}
+                                    {
+                                        errors
+                                            .password[0]
+                                    }
                                 </p>
                             )}
 
@@ -421,9 +586,13 @@ const Login = () => {
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={
+                                loading ||
+                                googleLoading
+                            }
                             className={`mt-[19px] flex h-[37px] w-full items-center justify-center rounded-full text-[13px] font-semibold text-white transition ${
-                                loading
+                                loading ||
+                                googleLoading
                                     ? "cursor-not-allowed bg-[#7fa5e8]"
                                     : "bg-[#286bd7] hover:bg-[#1f60c8]"
                             }`}

@@ -8,10 +8,12 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Repositories\Auth\AuthRepository;
 use App\Repositories\Auth\AuthRepositoryInterface;
-
+use App\Repositories\Auth\Social\SocialAccountRepository;
+use App\Repositories\Auth\Social\SocialAccountRepositoryInterface;
 use App\Repositories\Settings\Email\SmtpSettingRepository;
 use App\Repositories\Settings\Email\SmtpSettingRepositoryInterface;
-
+use App\Repositories\Settings\SocialLogin\SocialLoginRepository;
+use App\Repositories\Settings\SocialLogin\SocialLoginRepositoryInterface;
 use App\Services\Mail\DynamicMailConfigService;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,6 +32,18 @@ class AppServiceProvider extends ServiceProvider
             SmtpSettingRepositoryInterface::class,
             SmtpSettingRepository::class
         );
+
+          $this->app->bind(
+        SocialLoginRepositoryInterface::class,
+        SocialLoginRepository::class
+    );
+
+    $this->app->bind(
+    SocialAccountRepositoryInterface::class,
+    SocialAccountRepository::class
+);
+
+
     }
 
     /**

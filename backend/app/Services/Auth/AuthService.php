@@ -4,89 +4,259 @@ namespace App\Services\Auth;
 
 use App\Models\User;
 use App\Repositories\Auth\AuthRepositoryInterface;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Password;
-use RuntimeException;
 use Illuminate\Auth\Events\PasswordReset;
-
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class AuthService
 {
     public function __construct(
         protected AuthRepositoryInterface $authRepository
-    ) {}
+    ) {
+    }
 
-   public function registerCustomer(array $data): array
-{
-    $data['role'] = User::ROLE_CUSTOMER;
-    $data['status'] = User::STATUS_ACTIVE;
 
-    unset($data['password_confirmation']);
+    /*
+    |--------------------------------------------------------------------------
+    | Register Customer
+    |--------------------------------------------------------------------------
+    */
 
-    $user = $this->authRepository->create($data);
-
-    $token = auth('api')->login($user);
-
-    return [
-        'access_token' => $token,
-        'token_type' => 'Bearer',
-        'expires_in' => auth('api')->factory()->getTTL() * 60,
-        'user' => $user,
-    ];
-}
-
-    public function login(array $credentials): array
+    public function registerCustomer(array $data): array
     {
-        $user = $this->authRepository->findByEmail(
-            $credentials['email']
+        $data['role'] =
+            User::ROLE_CUSTOMER;
+
+        $data['status'] =
+            User::STATUS_ACTIVE;
+
+
+        unset(
+            $data['password_confirmation']
         );
 
-        if (!$user) {
-            throw ValidationException::withMessages([
-                'email' => ['Invalid email or password.'],
-            ]);
-        }
 
-        if (!$user->isActive()) {
-            throw ValidationException::withMessages([
-                'email' => ['Your account is not active.'],
-            ]);
-        }
+        $user =
+            $this->authRepository
+                ->create($data);
 
-        $token = auth('api')->attempt([
-            'email' => $credentials['email'],
-            'password' => $credentials['password'],
-        ]);
 
-        if (!$token) {
-            throw ValidationException::withMessages([
-                'email' => ['Invalid email or password.'],
-            ]);
-        }
+        /*
+        |--------------------------------------------------------------------------
+        | Attach Social Avatar
+        |--------------------------------------------------------------------------
+        */
 
-        $this->authRepository->updateLastLogin($user);
+        $user =
+            $this->attachSocialAvatar(
+                $user
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generate JWT
+        |--------------------------------------------------------------------------
+        */
+
+        $token =
+            auth('api')->login(
+                $user
+            );
+
 
         return [
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
-            'user' => $user->refresh(),
+            'access_token' =>
+                $token,
+
+            'token_type' =>
+                'Bearer',
+
+            'expires_in' =>
+                auth('api')
+                    ->factory()
+                    ->getTTL() * 60,
+
+            'user' =>
+                $user,
         ];
     }
 
 
-    public function me(): User
-    {
-        $userId = auth('api')->id();
+    /*
+    |--------------------------------------------------------------------------
+    | Login
+    |--------------------------------------------------------------------------
+    */
 
-        $user = $this->authRepository->findById($userId);
+    public function login(
+        array $credentials
+    ): array {
+        $user =
+            $this->authRepository
+                ->findByEmail(
+                    $credentials['email']
+                );
 
-        if (!$user) {
-            throw new \RuntimeException('Authenticated user not found.');
+
+        /*
+        |--------------------------------------------------------------------------
+        | User Exists
+        |--------------------------------------------------------------------------
+        */
+
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'email' => [
+                    'Invalid email or password.',
+                ],
+            ]);
         }
 
-        return $user;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Account Status
+        |--------------------------------------------------------------------------
+        */
+
+        if (! $user->isActive()) {
+            throw ValidationException::withMessages([
+                'email' => [
+                    'Your account is not active.',
+                ],
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Authenticate
+        |--------------------------------------------------------------------------
+        */
+
+        $token =
+            auth('api')->attempt([
+                'email' =>
+                    $credentials['email'],
+
+                'password' =>
+                    $credentials['password'],
+            ]);
+
+
+        if (! $token) {
+            throw ValidationException::withMessages([
+                'email' => [
+                    'Invalid email or password.',
+                ],
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Last Login
+        |--------------------------------------------------------------------------
+        */
+
+        $this->authRepository
+            ->updateLastLogin(
+                $user
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Refresh User
+        |--------------------------------------------------------------------------
+        */
+
+        $user =
+            $user->refresh();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Attach Social Avatar
+        |--------------------------------------------------------------------------
+        */
+
+        $user =
+            $this->attachSocialAvatar(
+                $user
+            );
+
+
+        return [
+            'access_token' =>
+                $token,
+
+            'token_type' =>
+                'Bearer',
+
+            'expires_in' =>
+                auth('api')
+                    ->factory()
+                    ->getTTL() * 60,
+
+            'user' =>
+                $user,
+        ];
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authenticated User
+    |--------------------------------------------------------------------------
+    */
+
+    public function me(): User
+    {
+        $userId =
+            auth('api')->id();
+
+
+        if (! $userId) {
+            throw new RuntimeException(
+                'Authenticated user not found.'
+            );
+        }
+
+
+        $user =
+            $this->authRepository
+                ->findById(
+                    (int) $userId
+                );
+
+
+        if (! $user) {
+            throw new RuntimeException(
+                'Authenticated user not found.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Attach Social Avatar
+        |--------------------------------------------------------------------------
+        */
+
+        return $this->attachSocialAvatar(
+            $user
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logout
+    |--------------------------------------------------------------------------
+    */
 
     public function logout(): void
     {
@@ -94,59 +264,122 @@ class AuthService
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Refresh JWT
+    |--------------------------------------------------------------------------
+    */
 
     public function refresh(): array
     {
-        $token = auth('api')->refresh();
+        $token =
+            auth('api')->refresh();
+
 
         return [
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'access_token' =>
+                $token,
+
+            'token_type' =>
+                'Bearer',
+
+            'expires_in' =>
+                auth('api')
+                    ->factory()
+                    ->getTTL() * 60,
         ];
     }
 
-    public function forgotPassword(string $email): void
-    {
-        $status = Password::sendResetLink([
-            'email' => $email,
-        ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Forgot Password
+    |--------------------------------------------------------------------------
+    */
+
+    public function forgotPassword(
+        string $email
+    ): void {
+        $status =
+            Password::sendResetLink([
+                'email' =>
+                    $email,
+            ]);
+
 
         if (
-            $status !== Password::RESET_LINK_SENT &&
-            $status !== Password::INVALID_USER
+            $status !==
+                Password::RESET_LINK_SENT &&
+            $status !==
+                Password::INVALID_USER
         ) {
-            throw new RuntimeException(__($status));
+            throw new RuntimeException(
+                __($status)
+            );
         }
     }
 
 
-    public function resetPassword(array $data): void
-    {
-        $status = Password::reset(
-            [
-                'email' => $data['email'],
-                'password' => $data['password'],
-                'password_confirmation' => $data['password_confirmation'],
-                'token' => $data['token'],
-            ],
-            function (User $user, string $password) {
-                $this->authRepository->update(
-                    $user,
-                    [
-                        'password' => $password,
-                    ]
-                );
+    /*
+    |--------------------------------------------------------------------------
+    | Reset Password
+    |--------------------------------------------------------------------------
+    */
 
-                event(new PasswordReset($user));
-            }
-        );
+    public function resetPassword(
+        array $data
+    ): void {
+        $status =
+            Password::reset(
+                [
+                    'email' =>
+                        $data['email'],
 
-        if ($status === Password::PASSWORD_RESET) {
+                    'password' =>
+                        $data['password'],
+
+                    'password_confirmation' =>
+                        $data['password_confirmation'],
+
+                    'token' =>
+                        $data['token'],
+                ],
+
+                function (
+                    User $user,
+                    string $password
+                ) {
+                    $this->authRepository
+                        ->update(
+                            $user,
+                            [
+                                'password' =>
+                                    $password,
+                            ]
+                        );
+
+
+                    event(
+                        new PasswordReset(
+                            $user
+                        )
+                    );
+                }
+            );
+
+
+        if (
+            $status ===
+            Password::PASSWORD_RESET
+        ) {
             return;
         }
 
-        if ($status === Password::INVALID_TOKEN) {
+
+        if (
+            $status ===
+            Password::INVALID_TOKEN
+        ) {
             throw ValidationException::withMessages([
                 'token' => [
                     'The password reset link is invalid or has expired.',
@@ -154,10 +387,72 @@ class AuthService
             ]);
         }
 
+
         throw ValidationException::withMessages([
             'email' => [
                 'Unable to reset password. Please request a new reset link.',
             ],
         ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attach Social Avatar
+    |--------------------------------------------------------------------------
+    */
+
+    private function attachSocialAvatar(
+        User $user
+    ): User {
+        /*
+        |--------------------------------------------------------------------------
+        | Load Social Accounts Relation
+        |--------------------------------------------------------------------------
+        */
+
+        $user->loadMissing(
+            'socialAccounts'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Find Google Account
+        |--------------------------------------------------------------------------
+        */
+
+        $googleAccount =
+            $user->socialAccounts
+                ->firstWhere(
+                    'provider',
+                    'google'
+                );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Add Avatar To User Response
+        |--------------------------------------------------------------------------
+        */
+
+        $user->setAttribute(
+            'avatar',
+            $googleAccount?->avatar_url
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hide Social Account Relation From Response
+        |--------------------------------------------------------------------------
+        */
+
+        $user->unsetRelation(
+            'socialAccounts'
+        );
+
+
+        return $user;
     }
 }
