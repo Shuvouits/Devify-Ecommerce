@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\Settings\Email\SmtpSettingController;
 use App\Http\Controllers\Admin\Settings\SocialLogin\SocialLoginController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\Profile\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,6 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
+    Route::post('/two-factor/verify', [AuthController::class, 'verifyTwoFactor']);
+
+
     Route::post('/refresh', [AuthController::class, 'refresh']);
 
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
@@ -40,6 +46,7 @@ Route::prefix('auth')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
     });
+
 });
 
 /*
@@ -76,5 +83,28 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
             Route::get('/{provider}', [SocialLoginController::class, 'show']);
             Route::put('/{provider}', [SocialLoginController::class, 'update']);
         });
+    });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Profile
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('profile')->middleware('auth:api')->group(function () {
+    Route::get('/', [ProfileController::class, 'show']);
+    Route::put('/', [ProfileController::class, 'update']);
+    Route::post('/photo', [ProfileController::class, 'uploadPhoto']);
+    Route::delete('/photo', [ProfileController::class, 'deletePhoto']);
+    Route::put('/password', [ProfileController::class, 'updatePassword']);
+
+    Route::prefix('two-factor')->group(function () {
+        Route::get('/status', [TwoFactorController::class, 'status']);
+        Route::post('/setup', [TwoFactorController::class, 'setup']);
+        Route::post('/confirm', [TwoFactorController::class, 'confirm']);
+        Route::delete('/', [TwoFactorController::class, 'disable']);
+        Route::post('/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes']);
     });
 });

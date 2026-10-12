@@ -60,25 +60,31 @@ const EmailSettings = () => {
     useEffect(() => {
         let mounted = true;
 
+
         const fetchSettings = async () => {
             try {
                 setLoading(true);
                 setPageError("");
+
 
                 const response =
                     await api.get(
                         "/admin/settings/email"
                     );
 
+
                 const data =
                     response.data?.data;
+
 
                 const settings =
                     data?.settings;
 
+
                 if (!mounted) {
                     return;
                 }
+
 
                 setPasswordConfigured(
                     Boolean(
@@ -86,11 +92,6 @@ const EmailSettings = () => {
                     )
                 );
 
-                /*
-                |--------------------------------------------------------------------------
-                | No saved settings yet
-                |--------------------------------------------------------------------------
-                */
 
                 if (!settings) {
                     setSmtpEnabled(false);
@@ -99,15 +100,12 @@ const EmailSettings = () => {
                 }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Load saved settings
-                |--------------------------------------------------------------------------
-                */
-
                 setSmtpEnabled(
-                    Boolean(settings.is_enabled)
+                    Boolean(
+                        settings.is_enabled
+                    )
                 );
+
 
                 setFormData({
                     provider:
@@ -119,7 +117,9 @@ const EmailSettings = () => {
 
                     port:
                         settings.port
-                            ? String(settings.port)
+                            ? String(
+                                settings.port
+                            )
                             : "587",
 
                     encryption:
@@ -128,12 +128,6 @@ const EmailSettings = () => {
 
                     username:
                         settings.username || "",
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Never load password from API
-                    |--------------------------------------------------------------------------
-                    */
 
                     password: "",
 
@@ -148,6 +142,7 @@ const EmailSettings = () => {
                 if (!mounted) {
                     return;
                 }
+
 
                 setPageError(
                     error.response?.data?.message ||
@@ -190,12 +185,6 @@ const EmailSettings = () => {
             [name]: value,
         }));
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Clear field validation error
-        |--------------------------------------------------------------------------
-        */
 
         if (errors[name]) {
             setErrors((prev) => ({
@@ -279,6 +268,7 @@ const EmailSettings = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+
         if (saving) {
             return;
         }
@@ -292,7 +282,8 @@ const EmailSettings = () => {
 
         try {
             const payload = {
-                is_enabled: smtpEnabled,
+                is_enabled:
+                    smtpEnabled,
 
                 provider:
                     formData.provider,
@@ -302,7 +293,9 @@ const EmailSettings = () => {
 
                 port:
                     formData.port
-                        ? Number(formData.port)
+                        ? Number(
+                            formData.port
+                        )
                         : null,
 
                 encryption:
@@ -321,12 +314,8 @@ const EmailSettings = () => {
 
             /*
             |--------------------------------------------------------------------------
-            | Only send password if admin entered one
+            | Only send password when entered
             |--------------------------------------------------------------------------
-            |
-            | Blank password means:
-            | preserve existing encrypted password.
-            |
             */
 
             if (
@@ -352,18 +341,13 @@ const EmailSettings = () => {
                 responseData?.settings;
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Update UI from saved data
-            |--------------------------------------------------------------------------
-            */
-
             if (settings) {
                 setSmtpEnabled(
                     Boolean(
                         settings.is_enabled
                     )
                 );
+
 
                 setFormData((prev) => ({
                     ...prev,
@@ -390,13 +374,8 @@ const EmailSettings = () => {
                         settings.username ||
                         "",
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Clear password after save
-                    |--------------------------------------------------------------------------
-                    */
-
-                    password: "",
+                    password:
+                        "",
 
                     from_email:
                         settings.from_email ||
@@ -423,12 +402,6 @@ const EmailSettings = () => {
             );
 
         } catch (error) {
-            /*
-            |--------------------------------------------------------------------------
-            | Validation errors - 422
-            |--------------------------------------------------------------------------
-            */
-
             if (
                 error.response?.status ===
                 422
@@ -438,19 +411,15 @@ const EmailSettings = () => {
                         ?.errors || {}
                 );
 
+
                 setPageError(
                     "Please check the highlighted fields."
                 );
 
+
                 return;
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Other errors
-            |--------------------------------------------------------------------------
-            */
 
             setPageError(
                 error.response?.data?.message ||
@@ -467,15 +436,13 @@ const EmailSettings = () => {
     |--------------------------------------------------------------------------
     | TEST EMAIL
     |--------------------------------------------------------------------------
-    |
-    | Backend endpoint for test email has not been created yet.
-    |
     */
 
     const handleTestEmail = (e) => {
         e.preventDefault();
 
         setTestMessage("");
+
 
         if (!testEmail.trim()) {
             setTestMessage(
@@ -484,6 +451,7 @@ const EmailSettings = () => {
 
             return;
         }
+
 
         setTestMessage(
             "Test email API will be connected in the next step."
@@ -499,7 +467,13 @@ const EmailSettings = () => {
 
     if (loading) {
         return (
-            <div className="mx-auto max-w-[800px] pb-[40px]">
+            <div
+                className="mx-auto max-w-[800px] pb-[40px]"
+                style={{
+                    fontFamily:
+                        "Inter, sans-serif",
+                }}
+            >
 
                 <div className="flex min-h-[360px] items-center justify-center rounded-[13px] border border-[#dadee3] bg-white">
 
@@ -507,7 +481,7 @@ const EmailSettings = () => {
 
                         <div className="h-[28px] w-[28px] animate-spin rounded-full border-[3px] border-[#dce6ff] border-t-[#286bd7]" />
 
-                        <span className="text-[11px] text-[#7a8491]">
+                        <span className="!text-[13px] !font-normal !leading-[20px] text-[#555555]">
                             Loading email settings...
                         </span>
 
@@ -521,7 +495,13 @@ const EmailSettings = () => {
 
 
     return (
-        <div className="mx-auto max-w-[800px] pb-[40px]">
+        <div
+            className="mx-auto max-w-[800px] pb-[40px]"
+            style={{
+                fontFamily:
+                    "Inter, sans-serif",
+            }}
+        >
 
             {/* Page Heading */}
 
@@ -531,11 +511,12 @@ const EmailSettings = () => {
 
                     <div>
 
-                        <h1 className="text-[18px] font-semibold text-[#182331]">
+                        <h1 className="!text-[18px] !font-semibold !leading-[27px] text-[#182331]">
                             Email Configuration (SMTP)
                         </h1>
 
-                        <p className="mt-[3px] text-[12px] text-[#7a8491]">
+
+                        <p className="mt-[3px] !text-[13px] !font-normal !leading-[20px] text-[#7a8491]">
                             Configure outgoing email delivery for your store
                         </p>
 
@@ -543,7 +524,7 @@ const EmailSettings = () => {
 
 
                     <span
-                        className={`rounded-full px-[10px] py-[4px] text-[9px] font-semibold ${
+                        className={`rounded-full px-[10px] py-[4px] !text-[11px] !font-semibold !leading-[16px] ${
                             smtpEnabled
                                 ? "bg-[#e9f8ef] text-[#32a35c]"
                                 : "bg-[#f1f2f4] text-[#747e89]"
@@ -551,7 +532,8 @@ const EmailSettings = () => {
                     >
                         {smtpEnabled
                             ? "Active"
-                            : "Disabled"}
+                            : "Disabled"
+                        }
                     </span>
 
                 </div>
@@ -562,7 +544,7 @@ const EmailSettings = () => {
             {/* Success Message */}
 
             {successMessage && (
-                <div className="mt-[14px] rounded-[10px] border border-[#bfe6cd] bg-[#f0fbf4] px-[14px] py-[11px] text-[11px] font-medium text-[#27854a]">
+                <div className="mt-[14px] rounded-[10px] border border-[#bfe6cd] bg-[#f0fbf4] px-[14px] py-[11px] !text-[13px] !font-normal !leading-[20px] text-[#27854a]">
                     {successMessage}
                 </div>
             )}
@@ -571,17 +553,21 @@ const EmailSettings = () => {
             {/* Error Message */}
 
             {pageError && (
-                <div className="mt-[14px] rounded-[10px] border border-[#f1c7c9] bg-[#fff5f5] px-[14px] py-[11px] text-[11px] font-medium text-[#c83d43]">
+                <div className="mt-[14px] rounded-[10px] border border-[#f1c7c9] bg-[#fff5f5] px-[14px] py-[11px] !text-[13px] !font-normal !leading-[20px] text-[#c83d43]">
                     {pageError}
                 </div>
             )}
 
 
-            {/* SMTP CARD */}
+            {/* SMTP Card */}
 
             <form
                 onSubmit={handleSubmit}
                 className="mt-[18px] overflow-hidden rounded-[13px] border border-[#dadee3] bg-white"
+                style={{
+                    fontFamily:
+                        "Inter, sans-serif",
+                }}
             >
 
                 {/* Card Header */}
@@ -590,7 +576,7 @@ const EmailSettings = () => {
 
                     <div className="flex items-center gap-[13px]">
 
-                        <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[9px] bg-[#eef4ff] text-[#3173ee]">
+                        <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[9px] bg-[#eef4ff] text-[#3173ee]">
 
                             <Mail
                                 size={19}
@@ -604,13 +590,13 @@ const EmailSettings = () => {
 
                             <div className="flex items-center gap-[8px]">
 
-                                <h2 className="text-[14px] font-semibold text-[#24303d]">
+                                <h2 className="!text-[14px] !font-semibold !leading-[21px] text-[#555555]">
                                     SMTP Email Delivery
                                 </h2>
 
 
                                 <span
-                                    className={`rounded-full px-[8px] py-[3px] text-[8px] font-semibold ${
+                                    className={`rounded-full px-[8px] py-[3px] !text-[11px] !font-semibold !leading-[16px] ${
                                         passwordConfigured
                                             ? "bg-[#ecf9f0] text-[#35a35e]"
                                             : "bg-[#f2f3f5] text-[#7b8490]"
@@ -618,13 +604,14 @@ const EmailSettings = () => {
                                 >
                                     {passwordConfigured
                                         ? "Configured"
-                                        : "Not configured"}
+                                        : "Not configured"
+                                    }
                                 </span>
 
                             </div>
 
 
-                            <p className="mt-[2px] text-[10px] text-[#89919c]">
+                            <p className="mt-[2px] !text-[12px] !font-normal !leading-[18px] text-[#89919c]">
                                 Send transactional and notification emails through your SMTP server
                             </p>
 
@@ -639,17 +626,19 @@ const EmailSettings = () => {
                         type="button"
                         onClick={() => {
                             setSmtpEnabled(
-                                (prev) => !prev
+                                (prev) =>
+                                    !prev
                             );
 
                             setSuccessMessage("");
                             setPageError("");
                         }}
-                        className={`relative h-[21px] w-[38px] rounded-full transition ${
+                        className={`relative h-[21px] w-[38px] shrink-0 rounded-full transition ${
                             smtpEnabled
                                 ? "bg-[#286bd7]"
                                 : "bg-[#cdd2d8]"
                         }`}
+                        aria-label="Toggle SMTP"
                     >
 
                         <span
@@ -669,7 +658,7 @@ const EmailSettings = () => {
 
                     {/* Provider */}
 
-                    <label className="text-[10px] font-medium text-[#454e5b]">
+                    <label className="block !text-[13px] !font-normal !leading-[20px] text-[#555555]">
                         Quick Provider Setup
                     </label>
 
@@ -736,7 +725,6 @@ const EmailSettings = () => {
                             name="host"
                             value={formData.host}
                             onChange={handleChange}
-                            placeholder="smtp.example.com"
                             error={
                                 errors.host?.[0]
                             }
@@ -748,7 +736,6 @@ const EmailSettings = () => {
                             name="port"
                             value={formData.port}
                             onChange={handleChange}
-                            placeholder="587"
                             error={
                                 errors.port?.[0]
                             }
@@ -757,21 +744,28 @@ const EmailSettings = () => {
 
                         <div>
 
-                            <label className="mb-[6px] block text-[10px] font-medium text-[#454e5b]">
+                            <label className="mb-[6px] block !text-[13px] !font-normal !leading-[20px] text-[#555555]">
                                 Encryption
                             </label>
+
 
                             <select
                                 name="encryption"
                                 value={
                                     formData.encryption
                                 }
-                                onChange={handleChange}
-                                className={`h-[37px] w-full rounded-[8px] border bg-white px-[11px] text-[11px] text-[#626c79] outline-none ${
+                                onChange={
+                                    handleChange
+                                }
+                                className={`h-[37px] w-full rounded-[8px] border bg-white px-[11px] !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none transition ${
                                     errors.encryption
                                         ? "border-[#e45a5f]"
                                         : "border-[#d9dde2] focus:border-[#7da5f4]"
                                 }`}
+                                style={{
+                                    fontFamily:
+                                        "Inter, sans-serif",
+                                }}
                             >
 
                                 <option value="tls">
@@ -813,8 +807,9 @@ const EmailSettings = () => {
                             value={
                                 formData.username
                             }
-                            onChange={handleChange}
-                            placeholder="SMTP username"
+                            onChange={
+                                handleChange
+                            }
                             error={
                                 errors.username?.[0]
                             }
@@ -825,7 +820,7 @@ const EmailSettings = () => {
 
                         <div>
 
-                            <label className="mb-[6px] block text-[10px] font-medium text-[#454e5b]">
+                            <label className="mb-[6px] block !text-[13px] !font-normal !leading-[20px] text-[#555555]">
                                 SMTP Password
                             </label>
 
@@ -851,13 +846,12 @@ const EmailSettings = () => {
                                     onChange={
                                         handleChange
                                     }
-                                    placeholder={
-                                        passwordConfigured
-                                            ? "Stored securely •••••••••••"
-                                            : "Enter SMTP password"
-                                    }
                                     autoComplete="new-password"
-                                    className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-[#afb5bd]"
+                                    className="min-w-0 flex-1 border-0 bg-transparent !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none"
+                                    style={{
+                                        fontFamily:
+                                            "Inter, sans-serif",
+                                    }}
                                 />
 
 
@@ -869,7 +863,12 @@ const EmailSettings = () => {
                                                 !prev
                                         )
                                     }
-                                    className="text-[#8c949d]"
+                                    className="ml-[8px] flex shrink-0 items-center justify-center text-[#8c949d]"
+                                    aria-label={
+                                        showPassword
+                                            ? "Hide password"
+                                            : "Show password"
+                                    }
                                 >
 
                                     {showPassword ? (
@@ -897,10 +896,11 @@ const EmailSettings = () => {
                             )}
 
 
-                            <p className="mt-[4px] text-[9px] text-[#a0a6af]">
+                            <p className="mt-[4px] !text-[12px] !font-normal !leading-[18px] text-[#8c8c8c]">
                                 {passwordConfigured
                                     ? "Leave blank to keep the existing password."
-                                    : "Enter the SMTP password to complete the initial setup."}
+                                    : "Enter the SMTP password to complete the initial setup."
+                                }
                             </p>
 
                         </div>
@@ -918,8 +918,9 @@ const EmailSettings = () => {
                             value={
                                 formData.from_email
                             }
-                            onChange={handleChange}
-                            placeholder="store@example.com"
+                            onChange={
+                                handleChange
+                            }
                             error={
                                 errors.from_email?.[0]
                             }
@@ -932,8 +933,9 @@ const EmailSettings = () => {
                             value={
                                 formData.from_name
                             }
-                            onChange={handleChange}
-                            placeholder="Storify"
+                            onChange={
+                                handleChange
+                            }
                             error={
                                 errors.from_name?.[0]
                             }
@@ -955,12 +957,12 @@ const EmailSettings = () => {
 
                         <div>
 
-                            <h4 className="text-[10px] font-semibold text-[#47515e]">
+                            <h4 className="!text-[13px] !font-semibold !leading-[20px] text-[#555555]">
                                 SMTP credentials are stored securely
                             </h4>
 
 
-                            <p className="mt-[3px] text-[9px] leading-[15px] text-[#9299a2]">
+                            <p className="mt-[3px] !text-[12px] !font-normal !leading-[18px] text-[#9299a2]">
                                 The SMTP password is encrypted before being stored.
                                 After saving, the password field stays blank and the
                                 existing password is preserved unless you enter a new one.
@@ -980,7 +982,7 @@ const EmailSettings = () => {
                     <button
                         type="submit"
                         disabled={saving}
-                        className="flex h-[36px] min-w-[118px] items-center justify-center gap-[7px] rounded-[8px] bg-[#286bd7] px-[15px] text-[11px] font-semibold text-white transition hover:bg-[#1f60c8] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex h-[36px] min-w-[118px] items-center justify-center gap-[7px] rounded-[8px] bg-[#286bd7] px-[15px] !text-[13px] !font-semibold !leading-[20px] text-white transition hover:bg-[#1f60c8] disabled:cursor-not-allowed disabled:opacity-60"
                     >
 
                         {saving ? (
@@ -991,7 +993,9 @@ const EmailSettings = () => {
                             </>
                         ) : (
                             <>
-                                <Save size={14} />
+                                <Save
+                                    size={14}
+                                />
 
                                 Save Changes
                             </>
@@ -1009,6 +1013,10 @@ const EmailSettings = () => {
             <form
                 onSubmit={handleTestEmail}
                 className="mt-[18px] rounded-[13px] border border-[#dadee3] bg-white px-[20px] py-[17px]"
+                style={{
+                    fontFamily:
+                        "Inter, sans-serif",
+                }}
             >
 
                 <div className="flex items-center gap-[12px]">
@@ -1025,12 +1033,12 @@ const EmailSettings = () => {
 
                     <div>
 
-                        <h3 className="text-[14px] font-semibold text-[#25303d]">
+                        <h3 className="!text-[14px] !font-semibold !leading-[21px] text-[#555555]">
                             Send Test Email
                         </h3>
 
 
-                        <p className="mt-[2px] text-[10px] text-[#9299a2]">
+                        <p className="mt-[2px] !text-[12px] !font-normal !leading-[18px] text-[#9299a2]">
                             Verify that your saved SMTP configuration can deliver email
                         </p>
 
@@ -1051,24 +1059,32 @@ const EmailSettings = () => {
 
                             setTestMessage("");
                         }}
-                        placeholder="Enter test email address"
-                        className="h-[38px] min-w-0 flex-1 rounded-[8px] border border-[#d9dde2] px-[12px] text-[11px] outline-none focus:border-[#7da5f4]"
+                        className="h-[38px] min-w-0 flex-1 rounded-[8px] border border-[#d9dde2] px-[12px] !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none transition focus:border-[#7da5f4]"
+                        style={{
+                            fontFamily:
+                                "Inter, sans-serif",
+                        }}
                     />
 
 
                     <button
                         type="submit"
-                        className="flex h-[38px] items-center gap-[7px] rounded-[8px] border border-[#d9dde2] bg-white px-[15px] text-[11px] font-semibold text-[#35404d] transition hover:bg-[#f7f8fa]"
+                        className="flex h-[38px] items-center gap-[7px] rounded-[8px] border border-[#d9dde2] bg-white px-[15px] !text-[13px] !font-semibold !leading-[20px] text-[#555555] transition hover:bg-[#f7f8fa]"
                     >
-                        <Send size={14} />
+
+                        <Send
+                            size={14}
+                        />
+
                         Send Test
+
                     </button>
 
                 </div>
 
 
                 {testMessage && (
-                    <p className="mt-[8px] text-[10px] text-[#7a8491]">
+                    <p className="mt-[8px] !text-[12px] !font-normal !leading-[18px] text-[#7a8491]">
                         {testMessage}
                     </p>
                 )}
@@ -1095,15 +1111,23 @@ const ProviderButton = ({
         <button
             type="button"
             onClick={onClick}
-            className={`flex h-[34px] items-center gap-[7px] rounded-[8px] border px-[12px] text-[10px] font-medium transition ${
+            className={`flex h-[34px] items-center gap-[7px] rounded-[8px] border px-[12px] !text-[13px] !font-normal !leading-[20px] transition ${
                 active
                     ? "border-[#9ab9f7] bg-[#eef4ff] text-[#286bd7]"
-                    : "border-[#d9dde2] bg-white text-[#424b57] hover:bg-[#f7f8fa]"
+                    : "border-[#d9dde2] bg-white text-[#555555] hover:bg-[#f7f8fa]"
             }`}
+            style={{
+                fontFamily:
+                    "Inter, sans-serif",
+            }}
         >
-            <HardDrive size={14} />
+
+            <HardDrive
+                size={14}
+            />
 
             {label}
+
         </button>
     );
 };
@@ -1120,13 +1144,12 @@ const Field = ({
     name,
     value,
     onChange,
-    placeholder,
     error,
 }) => {
     return (
         <div>
 
-            <label className="mb-[6px] block text-[10px] font-medium text-[#454e5b]">
+            <label className="mb-[6px] block !text-[13px] !font-normal !leading-[20px] text-[#555555]">
                 {label}
             </label>
 
@@ -1136,12 +1159,15 @@ const Field = ({
                 name={name}
                 value={value}
                 onChange={onChange}
-                placeholder={placeholder}
-                className={`h-[37px] w-full rounded-[8px] border bg-white px-[11px] text-[11px] text-[#626c79] outline-none transition placeholder:text-[#b0b6bd] ${
+                className={`h-[37px] w-full rounded-[8px] border bg-white px-[11px] !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none transition ${
                     error
                         ? "border-[#e45a5f]"
                         : "border-[#d9dde2] focus:border-[#7da5f4]"
                 }`}
+                style={{
+                    fontFamily:
+                        "Inter, sans-serif",
+                }}
             />
 
 
@@ -1162,9 +1188,11 @@ const Field = ({
 |--------------------------------------------------------------------------
 */
 
-const ErrorText = ({ children }) => {
+const ErrorText = ({
+    children,
+}) => {
     return (
-        <p className="mt-[4px] text-[9px] font-medium text-[#d8484d]">
+        <p className="mt-[4px] !text-[12px] !font-normal !leading-[18px] text-[#d8484d]">
             {children}
         </p>
     );

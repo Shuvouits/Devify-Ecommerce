@@ -10,10 +10,14 @@ use App\Repositories\Auth\AuthRepository;
 use App\Repositories\Auth\AuthRepositoryInterface;
 use App\Repositories\Auth\Social\SocialAccountRepository;
 use App\Repositories\Auth\Social\SocialAccountRepositoryInterface;
+use App\Repositories\Profile\ProfileRepository;
+use App\Repositories\Profile\ProfileRepositoryInterface;
 use App\Repositories\Settings\Email\SmtpSettingRepository;
 use App\Repositories\Settings\Email\SmtpSettingRepositoryInterface;
 use App\Repositories\Settings\SocialLogin\SocialLoginRepository;
 use App\Repositories\Settings\SocialLogin\SocialLoginRepositoryInterface;
+use App\Repositories\TwoFactor\TwoFactorRepository;
+use App\Repositories\TwoFactor\TwoFactorRepositoryInterface;
 use App\Services\Mail\DynamicMailConfigService;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,17 +37,25 @@ class AppServiceProvider extends ServiceProvider
             SmtpSettingRepository::class
         );
 
-          $this->app->bind(
-        SocialLoginRepositoryInterface::class,
-        SocialLoginRepository::class
-    );
+        $this->app->bind(
+            SocialLoginRepositoryInterface::class,
+            SocialLoginRepository::class
+        );
 
-    $this->app->bind(
-    SocialAccountRepositoryInterface::class,
-    SocialAccountRepository::class
-);
+        $this->app->bind(
+            SocialAccountRepositoryInterface::class,
+            SocialAccountRepository::class
+        );
 
+        $this->app->bind(
+            ProfileRepositoryInterface::class,
+            ProfileRepository::class
+        );
 
+        $this->app->bind(
+            TwoFactorRepositoryInterface::class,
+            TwoFactorRepository::class
+        );
     }
 
     /**
@@ -111,4 +123,3 @@ class AppServiceProvider extends ServiceProvider
         );
     }
 }
-

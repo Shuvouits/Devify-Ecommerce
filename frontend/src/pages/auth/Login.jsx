@@ -135,6 +135,17 @@ const Login = () => {
         setErrors({});
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Any Old 2FA Challenge
+        |--------------------------------------------------------------------------
+        */
+
+        sessionStorage.removeItem(
+            "two_factor_challenge"
+        );
+
+
         try {
             const response =
                 await api.post(
@@ -149,14 +160,81 @@ const Login = () => {
                 );
 
 
+            const data =
+                response.data?.data;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Two-Factor Authentication Required
+            |--------------------------------------------------------------------------
+            |
+            | Important:
+            | Backend must NOT return the final JWT at this point.
+            | It should return a temporary challenge token.
+            |
+            */
+
+            if (
+                data?.requires_two_factor
+            ) {
+                const challengeToken =
+                    data?.challenge_token;
+
+
+                if (!challengeToken) {
+                    throw new Error(
+                        "Two-factor authentication challenge was not returned."
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Store Temporary Challenge
+                |--------------------------------------------------------------------------
+                |
+                | sessionStorage use korchi intentionally.
+                | Browser tab/session close hole temporary challenge remove hoye jabe.
+                |
+                */
+
+                sessionStorage.setItem(
+                    "two_factor_challenge",
+                    challengeToken
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Go To 2FA Challenge Page
+                |--------------------------------------------------------------------------
+                */
+
+                navigate(
+                    "/two-factor-challenge",
+                    {
+                        replace: true,
+                    }
+                );
+
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Normal Login
+            |--------------------------------------------------------------------------
+            */
+
             const token =
-                response.data?.data
-                    ?.access_token;
+                data?.access_token;
 
 
             const user =
-                response.data?.data
-                    ?.user;
+                data?.user;
 
 
             if (!token || !user) {
@@ -180,6 +258,17 @@ const Login = () => {
 
             /*
             |--------------------------------------------------------------------------
+            | Make Sure Old Challenge Is Removed
+            |--------------------------------------------------------------------------
+            */
+
+            sessionStorage.removeItem(
+                "two_factor_challenge"
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
             | Role Based Redirect
             |--------------------------------------------------------------------------
             */
@@ -198,6 +287,7 @@ const Login = () => {
             );
 
         } catch (error) {
+
             /*
             |--------------------------------------------------------------------------
             | Validation Error
@@ -218,6 +308,7 @@ const Login = () => {
                         ],
                     }
                 );
+
 
                 return;
             }
@@ -240,6 +331,7 @@ const Login = () => {
                         "Invalid email or password.",
                     ],
                 });
+
 
                 return;
             }
@@ -283,6 +375,17 @@ const Login = () => {
 
         setGoogleLoading(true);
         setErrors({});
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Old Password Login 2FA Challenge
+        |--------------------------------------------------------------------------
+        */
+
+        sessionStorage.removeItem(
+            "two_factor_challenge"
+        );
 
 
         const apiBaseUrl =
@@ -597,10 +700,12 @@ const Login = () => {
                                     : "bg-[#286bd7] hover:bg-[#1f60c8]"
                             }`}
                         >
+
                             {loading
                                 ? "Signing in..."
                                 : "Sign in"
                             }
+
                         </button>
 
 

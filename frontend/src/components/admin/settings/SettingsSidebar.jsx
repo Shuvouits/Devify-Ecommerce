@@ -1,4 +1,7 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import {
+    NavLink,
+    useNavigate,
+} from "react-router-dom";
 
 import {
     Bell,
@@ -14,9 +17,7 @@ import {
     Palette,
     Search,
     Shield,
-    ShoppingBag,
     Store,
-    WalletCards,
 } from "lucide-react";
 
 
@@ -85,6 +86,7 @@ const settingsItems = [
 const SettingsSidebar = () => {
     const navigate = useNavigate();
 
+
     return (
         <aside className="sticky top-0 flex h-screen w-[305px] shrink-0 flex-col border-r border-[#dde1e6] bg-white">
 
@@ -94,17 +96,24 @@ const SettingsSidebar = () => {
 
                 <div className="flex items-center gap-[11px]">
 
-                    <div className="flex h-[36px] w-[36px] items-center justify-center rounded-[9px] bg-[#eef4ff] text-[#2f6ff3]">
-                        <Store size={18} />
+                    <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[9px] bg-[#eef4ff] text-[#2f6ff3]">
+
+                        <Store
+                            size={18}
+                            strokeWidth={1.7}
+                        />
+
                     </div>
+
 
                     <div className="min-w-0">
 
-                        <div className="text-[14px] font-semibold text-[#172333]">
+                        <div className="text-[14px] font-semibold leading-[20px] text-[#172333]">
                             Storify
                         </div>
 
-                        <div className="mt-[1px] truncate text-[10px] text-[#7d8794]">
+
+                        <div className="mt-[1px] truncate text-[10px] font-normal leading-[15px] text-[#7d8794]">
                             http://localhost:5173
                         </div>
 
@@ -123,13 +132,15 @@ const SettingsSidebar = () => {
 
                     <Search
                         size={15}
-                        className="mr-[9px] text-[#8a929c]"
+                        strokeWidth={1.7}
+                        className="mr-[9px] shrink-0 text-[#8a929c]"
                     />
+
 
                     <input
                         type="text"
                         placeholder="Search settings"
-                        className="h-full min-w-0 flex-1 bg-transparent text-[12px] outline-none placeholder:text-[#9299a3]"
+                        className="h-full min-w-0 flex-1 border-0 bg-transparent !text-[13px] !font-normal !leading-[20px] text-[#333333] outline-none placeholder:!text-[13px] placeholder:!font-normal placeholder:text-[#9299a3]"
                     />
 
                 </div>
@@ -146,41 +157,55 @@ const SettingsSidebar = () => {
                     {settingsItems.map((item) => {
                         const Icon = item.icon;
 
+
                         if (item.path) {
                             return (
                                 <NavLink
                                     key={item.label}
                                     to={item.path}
                                     className={({ isActive }) =>
-                                        `flex h-[37px] items-center gap-[11px] rounded-[8px] px-[10px] text-[12px] font-medium transition ${
+                                        `flex h-[37px] w-full items-center gap-[11px] rounded-[8px] px-[10px] !text-[13px] !font-normal !leading-[20px] transition ${
                                             isActive
                                                 ? "bg-[#eaf1ff] text-[#2365d8]"
-                                                : "text-[#303945] hover:bg-[#f6f7f9]"
+                                                : "text-[#333333] hover:bg-[#f6f7f9]"
                                         }`
                                     }
                                 >
+
                                     <Icon
                                         size={16}
                                         strokeWidth={1.7}
+                                        className="shrink-0"
                                     />
 
-                                    {item.label}
+
+                                    <span className="min-w-0 truncate !text-[13px] !font-normal !leading-[20px]">
+                                        {item.label}
+                                    </span>
+
                                 </NavLink>
                             );
                         }
+
 
                         return (
                             <button
                                 key={item.label}
                                 type="button"
-                                className="flex h-[37px] w-full items-center gap-[11px] rounded-[8px] px-[10px] text-left text-[12px] font-medium text-[#303945] transition hover:bg-[#f6f7f9]"
+                                className="flex h-[37px] w-full items-center gap-[11px] rounded-[8px] px-[10px] text-left !text-[13px] !font-normal !leading-[20px] text-[#333333] transition hover:bg-[#f6f7f9]"
                             >
+
                                 <Icon
                                     size={16}
                                     strokeWidth={1.7}
+                                    className="shrink-0"
                                 />
 
-                                {item.label}
+
+                                <span className="min-w-0 truncate !text-[13px] !font-normal !leading-[20px]">
+                                    {item.label}
+                                </span>
+
                             </button>
                         );
                     })}
@@ -197,12 +222,23 @@ const SettingsSidebar = () => {
                 <button
                     type="button"
                     onClick={() =>
-                        navigate("/admin/dashboard")
+                        navigate(
+                            "/admin/dashboard"
+                        )
                     }
-                    className="flex h-[34px] items-center justify-center gap-[8px] rounded-full border border-[#dcdfe4] bg-white px-[16px] text-[12px] font-medium text-[#1f2834] transition hover:bg-[#f8f9fa]"
+                    className="flex h-[34px] items-center justify-center gap-[8px] whitespace-nowrap rounded-full border border-[#dcdfe4] bg-white px-[16px] !text-[13px] !font-normal !leading-[20px] text-[#333333] transition hover:bg-[#f8f9fa]"
                 >
-                    <Grid3X3 size={14} />
-                    Dashboard
+
+                    <Grid3X3
+                        size={14}
+                        strokeWidth={1.7}
+                    />
+
+
+                    <span className="!text-[13px] !font-normal !leading-[20px]">
+                        Dashboard
+                    </span>
+
                 </button>
 
             </div>

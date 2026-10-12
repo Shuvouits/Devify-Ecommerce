@@ -24,6 +24,8 @@ import VendorDashboard from "./layouts/vendor/Dashboard";
 
 import EmailSettings from "./pages/admin/settings/EmailSettings";
 import SocialLoginSettings from "./pages/admin/settings/social-login/SocialLoginSettings";
+import Profile from "./pages/profile/Profile";
+import TwoFactorChallenge from "./pages/auth/TwoFactorChallenge";
 
 const App = () => {
     return (
@@ -34,6 +36,8 @@ const App = () => {
                 <Route element={<FrontendLayout />}>
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/two-factor-challenge"  element={<TwoFactorChallenge />} />
+
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
@@ -45,6 +49,7 @@ const App = () => {
                     <Route element={<RoleRoute allowedRoles={["customer"]} />}>
                         <Route path="/account" element={<CustomerLayout />}>
                             <Route index element={<CustomerDashboard />} />
+                            <Route path="profile" element={<Profile />} />
                         </Route>
                     </Route>
 
@@ -58,6 +63,7 @@ const App = () => {
                     <Route path="/admin" element={<AdminLayout />}>
                         <Route index element={<Navigate to="/admin/dashboard" replace />} />
                         <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="profile" element={<Profile />} />
                     </Route>
 
                     {/* Admin Settings Workspace */}
@@ -72,6 +78,7 @@ const App = () => {
                 <Route element={<RoleRoute allowedRoles={["vendor"]} />}>
                     <Route path="/vendor" element={<VendorLayout />}>
                         <Route index element={<VendorDashboard />} />
+                        <Route path="profile" element={<Profile />} />
                     </Route>
                 </Route>
             </Routes>

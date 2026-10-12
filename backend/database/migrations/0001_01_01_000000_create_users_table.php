@@ -11,60 +11,178 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
+            /*
+            |--------------------------------------------------------------------------
+            | Basic Information
+            |--------------------------------------------------------------------------
+            */
+
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
 
-            $table->enum('role', [
-                'admin',
-                'customer',
-                'vendor',
-            ])->default('customer');
+            $table
+                ->string('first_name', 100)
+                ->nullable();
 
-            $table->enum('status', [
-                'active',
-                'inactive',
-                'suspended',
-            ])->default('active');
+            $table
+                ->string('last_name', 100)
+                ->nullable();
 
-            $table->timestamp('email_verified_at')->nullable();
+            $table
+                ->string('email')
+                ->unique();
+
+            $table
+                ->string('phone')
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Profile Information
+            |--------------------------------------------------------------------------
+            */
+
+            $table
+                ->date('birthday')
+                ->nullable();
+
+            $table
+                ->string('gender', 30)
+                ->nullable();
+
+            $table
+                ->string('profile_photo_path', 500)
+                ->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Role
+            |--------------------------------------------------------------------------
+            */
+
+            $table
+                ->enum('role', [
+                    'admin',
+                    'customer',
+                    'vendor',
+                ])
+                ->default('customer');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Account Status
+            |--------------------------------------------------------------------------
+            */
+
+            $table
+                ->enum('status', [
+                    'active',
+                    'inactive',
+                    'suspended',
+                ])
+                ->default('active');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Authentication
+            |--------------------------------------------------------------------------
+            */
+
+            $table
+                ->timestamp('email_verified_at')
+                ->nullable();
 
             $table->string('password');
 
-            $table->timestamp('last_login_at')->nullable();
+            $table
+                ->timestamp('last_login_at')
+                ->nullable();
 
             $table->rememberToken();
+
             $table->timestamps();
         });
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
 
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
-        });
+        /*
+        |--------------------------------------------------------------------------
+        | Password Reset Tokens
+        |--------------------------------------------------------------------------
+        */
+
+        Schema::create(
+            'password_reset_tokens',
+            function (Blueprint $table) {
+                $table
+                    ->string('email')
+                    ->primary();
+
+                $table->string('token');
+
+                $table
+                    ->timestamp('created_at')
+                    ->nullable();
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sessions
+        |--------------------------------------------------------------------------
+        */
+
+        Schema::create(
+            'sessions',
+            function (Blueprint $table) {
+                $table
+                    ->string('id')
+                    ->primary();
+
+                $table
+                    ->foreignId('user_id')
+                    ->nullable()
+                    ->index();
+
+                $table
+                    ->string('ip_address', 45)
+                    ->nullable();
+
+                $table
+                    ->text('user_agent')
+                    ->nullable();
+
+                $table->longText('payload');
+
+                $table
+                    ->integer('last_activity')
+                    ->index();
+            }
+        );
     }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
+        Schema::dropIfExists(
+            'sessions'
+        );
+
+        Schema::dropIfExists(
+            'password_reset_tokens'
+        );
+
+        Schema::dropIfExists(
+            'users'
+        );
     }
 };
