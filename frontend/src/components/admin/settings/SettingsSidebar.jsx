@@ -54,6 +54,7 @@ const settingsItems = [
     {
         label: "AI Configuration",
         icon: Bot,
+         path: "/admin/settings/ai",
     },
     {
         label: "Security & Access Control",

@@ -26,6 +26,11 @@ import EmailSettings from "./pages/admin/settings/EmailSettings";
 import SocialLoginSettings from "./pages/admin/settings/social-login/SocialLoginSettings";
 import Profile from "./pages/profile/Profile";
 import TwoFactorChallenge from "./pages/auth/TwoFactorChallenge";
+import AiConfiguration from "./pages/admin/settings/AiConfiguration";
+import BrandIndex from "./pages/admin/brands/BrandIndex";
+import BrandCreate from "./pages/admin/brands/BrandCreate";
+import BrandEdit from "./pages/admin/brands/BrandEdit";
+
 
 const App = () => {
     return (
@@ -64,13 +69,22 @@ const App = () => {
                         <Route index element={<Navigate to="/admin/dashboard" replace />} />
                         <Route path="dashboard" element={<AdminDashboard />} />
                         <Route path="profile" element={<Profile />} />
+                        <Route path="brands" element={<BrandIndex />} />
+
+                        <Route path="brands/create" element={<BrandCreate />} />
+
+                        <Route path="brands/:id/edit" element={<BrandEdit />} />
+
                     </Route>
+
+                  
 
                     {/* Admin Settings Workspace */}
                     <Route path="/admin/settings" element={<AdminSettingsLayout />}>
                         <Route index element={<Navigate to="/admin/settings/email" replace />} />
                         <Route path="email" element={<EmailSettings />} />
                         <Route path="social-login" element={<SocialLoginSettings />} />
+                        <Route path="ai" element={<AiConfiguration />} />
                     </Route>
                 </Route>
 

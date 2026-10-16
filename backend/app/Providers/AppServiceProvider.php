@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Ai\AiSettingRepository;
+use App\Repositories\Ai\AiSettingRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,6 +12,8 @@ use App\Repositories\Auth\AuthRepository;
 use App\Repositories\Auth\AuthRepositoryInterface;
 use App\Repositories\Auth\Social\SocialAccountRepository;
 use App\Repositories\Auth\Social\SocialAccountRepositoryInterface;
+use App\Repositories\Brand\BrandRepository;
+use App\Repositories\Brand\BrandRepositoryInterface;
 use App\Repositories\Profile\ProfileRepository;
 use App\Repositories\Profile\ProfileRepositoryInterface;
 use App\Repositories\Settings\Email\SmtpSettingRepository;
@@ -55,6 +59,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             TwoFactorRepositoryInterface::class,
             TwoFactorRepository::class
+        );
+
+        $this->app->bind(
+            AiSettingRepositoryInterface::class,
+            AiSettingRepository::class
+        );
+
+        $this->app->bind(
+            BrandRepositoryInterface::class,
+            BrandRepository::class
         );
     }
 

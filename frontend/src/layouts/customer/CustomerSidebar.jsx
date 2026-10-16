@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+    useEffect,
+    useState,
+} from "react";
 
 import {
     Bell,
@@ -42,7 +45,62 @@ const CustomerSidebar = () => {
     |--------------------------------------------------------------------------
     */
 
-    const customer = getStoredUser();
+    const [customer, setCustomer] =
+    useState(() =>
+        getStoredUser()
+    );
+
+
+    useEffect(() => {
+    const handleUserUpdated = (event) => {
+        if (event.detail) {
+            setCustomer(
+                event.detail
+            );
+
+            return;
+        }
+
+        setCustomer(
+            getStoredUser()
+        );
+    };
+
+
+    const handleStorageChange = (event) => {
+        if (
+            event.key === "user"
+        ) {
+            setCustomer(
+                getStoredUser()
+            );
+        }
+    };
+
+
+    window.addEventListener(
+        "auth:user-updated",
+        handleUserUpdated
+    );
+
+    window.addEventListener(
+        "storage",
+        handleStorageChange
+    );
+
+
+    return () => {
+        window.removeEventListener(
+            "auth:user-updated",
+            handleUserUpdated
+        );
+
+        window.removeEventListener(
+            "storage",
+            handleStorageChange
+        );
+    };
+}, []);
 
 
     /*
