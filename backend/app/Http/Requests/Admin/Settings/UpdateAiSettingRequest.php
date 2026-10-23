@@ -18,7 +18,7 @@ class UpdateAiSettingRequest extends FormRequest
             'provider' => [
                 'required',
                 'string',
-                'in:openrouter',
+                'in:openrouter,nvidia',
             ],
 
             'api_key' => [

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Admin\CategoryRepository;
+use App\Repositories\Admin\CategoryRepositoryInterface;
 use App\Repositories\Ai\AiSettingRepository;
 use App\Repositories\Ai\AiSettingRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
@@ -70,6 +72,13 @@ class AppServiceProvider extends ServiceProvider
             BrandRepositoryInterface::class,
             BrandRepository::class
         );
+
+         $this->app->bind(
+        CategoryRepositoryInterface::class,
+        CategoryRepository::class
+    );
+
+
     }
 
     /**

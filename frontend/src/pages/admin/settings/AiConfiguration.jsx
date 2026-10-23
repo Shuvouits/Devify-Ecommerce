@@ -13,6 +13,53 @@ import {
 import useAiSettings from "../../../hooks/admin/settings/useAiSettings";
 
 
+/*
+|--------------------------------------------------------------------------
+| Provider Configuration
+|--------------------------------------------------------------------------
+*/
+
+const PROVIDERS = {
+    openrouter: {
+        name: "OpenRouter",
+        title: "OpenRouter AI",
+        description:
+            "Connect Devify to OpenRouter for AI-powered features",
+        apiKeyLabel:
+            "OpenRouter API Key",
+        apiKeyPlaceholder:
+            "Enter your OpenRouter API key",
+        modelExample:
+            "openrouter/free",
+        defaultModel:
+            "openrouter/free",
+        url:
+            "https://openrouter.ai/api/v1/chat/completions",
+        baseUrl:
+            "https://openrouter.ai/api/v1",
+    },
+
+    nvidia: {
+        name: "NVIDIA NIM",
+        title: "NVIDIA NIM",
+        description:
+            "Connect Devify to NVIDIA NIM for AI-powered features",
+        apiKeyLabel:
+            "NVIDIA API Key",
+        apiKeyPlaceholder:
+            "Enter your NVIDIA API key",
+        modelExample:
+            "nvidia/nemotron-3-ultra-550b-a55b",
+        defaultModel:
+            "nvidia/nemotron-3-ultra-550b-a55b",
+        url:
+            "https://integrate.api.nvidia.com/v1/chat/completions",
+        baseUrl:
+            "https://integrate.api.nvidia.com/v1",
+    },
+};
+
+
 const AiConfiguration = () => {
     const {
         formData,
@@ -41,12 +88,125 @@ const AiConfiguration = () => {
 
     /*
     |--------------------------------------------------------------------------
+    | Current Provider
+    |--------------------------------------------------------------------------
+    */
+
+    const providerKey =
+        formData.provider &&
+        PROVIDERS[formData.provider]
+            ? formData.provider
+            : "openrouter";
+
+
+    const provider =
+        PROVIDERS[providerKey];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Hook Field
+    |--------------------------------------------------------------------------
+    */
+
+    const updateField = (
+        name,
+        value
+    ) => {
+        handleChange({
+            target: {
+                name,
+                value,
+                type: "text",
+            },
+        });
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Provider Change
+    |--------------------------------------------------------------------------
+    */
+
+    const handleProviderChange = (
+        event
+    ) => {
+        const value =
+            event.target.value;
+
+
+        const selectedProvider =
+            PROVIDERS[value];
+
+
+        if (!selectedProvider) {
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Provider
+        |--------------------------------------------------------------------------
+        */
+
+        updateField(
+            "provider",
+            value
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Provider Defaults
+        |--------------------------------------------------------------------------
+        |
+        | Switching provider automatically sets the correct model
+        | and API endpoints.
+        |
+        */
+
+        updateField(
+            "model",
+            selectedProvider.defaultModel
+        );
+
+
+        updateField(
+            "url",
+            selectedProvider.url
+        );
+
+
+        updateField(
+            "base_url",
+            selectedProvider.baseUrl
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hide API Key
+        |--------------------------------------------------------------------------
+        */
+
+        setShowApiKey(
+            false
+        );
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Submit
     |--------------------------------------------------------------------------
     */
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (
+        event
+    ) => {
+        event.preventDefault();
 
         await saveSettings();
     };
@@ -122,8 +282,7 @@ const AiConfiguration = () => {
                     >
                         {aiEnabled
                             ? "Active"
-                            : "Disabled"
-                        }
+                            : "Disabled"}
                     </span>
 
                 </div>
@@ -149,10 +308,12 @@ const AiConfiguration = () => {
             )}
 
 
-            {/* Configuration Card */}
+            {/* Configuration */}
 
             <form
-                onSubmit={handleSubmit}
+                onSubmit={
+                    handleSubmit
+                }
                 className="mt-[18px] overflow-hidden rounded-[13px] border border-[#dadee3] bg-white"
             >
 
@@ -177,7 +338,7 @@ const AiConfiguration = () => {
                             <div className="flex items-center gap-[8px]">
 
                                 <h2 className="!text-[14px] !font-semibold !leading-[21px] text-[#555555]">
-                                    OpenRouter AI
+                                    {provider.title}
                                 </h2>
 
 
@@ -190,15 +351,14 @@ const AiConfiguration = () => {
                                 >
                                     {apiKeyConfigured
                                         ? "Configured"
-                                        : "Not configured"
-                                    }
+                                        : "Not configured"}
                                 </span>
 
                             </div>
 
 
                             <p className="mt-[2px] !text-[12px] !font-normal !leading-[18px] text-[#89919c]">
-                                Connect Devify to OpenRouter for AI-powered features
+                                {provider.description}
                             </p>
 
                         </div>
@@ -245,19 +405,57 @@ const AiConfiguration = () => {
                         </label>
 
 
-                        <div className="flex h-[37px] w-full items-center rounded-[8px] border border-[#d9dde2] bg-[#f8f9fa] px-[11px]">
+                        <div className="relative">
 
                             <Bot
                                 size={15}
                                 strokeWidth={1.7}
-                                className="mr-[8px] text-[#667381]"
+                                className="pointer-events-none absolute left-[11px] top-1/2 z-10 -translate-y-1/2 text-[#667381]"
                             />
 
-                            <span className="!text-[13px] !font-normal !leading-[20px] text-[#555555]">
-                                OpenRouter
-                            </span>
+
+                            <select
+                                name="provider"
+                                value={
+                                    providerKey
+                                }
+                                onChange={
+                                    handleProviderChange
+                                }
+                                className="h-[37px] w-full appearance-none rounded-[8px] border border-[#d9dde2] bg-white pl-[34px] pr-[36px] !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none transition focus:border-[#7da5f4]"
+                            >
+                                <option value="openrouter">
+                                    OpenRouter
+                                </option>
+
+                                <option value="nvidia">
+                                    NVIDIA NIM
+                                </option>
+                            </select>
+
+
+                            <svg
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                className="pointer-events-none absolute right-[12px] top-1/2 h-[14px] w-[14px] -translate-y-1/2 text-[#7c858f]"
+                            >
+                                <path
+                                    d="M6 8L10 12L14 8"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
 
                         </div>
+
+
+                        {errors.provider?.[0] && (
+                            <ErrorText>
+                                {errors.provider[0]}
+                            </ErrorText>
+                        )}
 
                     </div>
 
@@ -267,7 +465,7 @@ const AiConfiguration = () => {
                     <div className="mt-[14px]">
 
                         <label className="mb-[6px] block !text-[13px] !font-normal !leading-[20px] text-[#555555]">
-                            OpenRouter API Key
+                            {provider.apiKeyLabel}
                         </label>
 
 
@@ -287,13 +485,19 @@ const AiConfiguration = () => {
                                 }
                                 name="api_key"
                                 value={
-                                    formData.api_key
+                                    formData.api_key ||
+                                    ""
                                 }
                                 onChange={
                                     handleChange
                                 }
                                 autoComplete="new-password"
-                                className="min-w-0 flex-1 border-0 bg-transparent !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none"
+                                placeholder={
+                                    apiKeyConfigured
+                                        ? ""
+                                        : provider.apiKeyPlaceholder
+                                }
+                                className="min-w-0 flex-1 border-0 bg-transparent !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none placeholder:text-[#a5abb3]"
                             />
 
 
@@ -301,8 +505,8 @@ const AiConfiguration = () => {
                                 type="button"
                                 onClick={() =>
                                     setShowApiKey(
-                                        (prev) =>
-                                            !prev
+                                        (previous) =>
+                                            !previous
                                     )
                                 }
                                 className="ml-[8px] flex shrink-0 items-center justify-center text-[#8c949d]"
@@ -340,13 +544,12 @@ const AiConfiguration = () => {
                                     An API key is already configured
                                     {maskedApiKey
                                         ? ` (${maskedApiKey})`
-                                        : ""
-                                    }.
-                                    {" "}
+                                        : ""}
+                                    .{" "}
                                     Leave this field blank to keep the existing key.
                                 </>
                             ) : (
-                                "Enter your OpenRouter API key to complete the setup."
+                                `Enter your ${provider.name} API key to complete the setup.`
                             )}
 
                         </p>
@@ -362,7 +565,8 @@ const AiConfiguration = () => {
                             label="Model"
                             name="model"
                             value={
-                                formData.model
+                                formData.model ||
+                                ""
                             }
                             onChange={
                                 handleChange
@@ -372,8 +576,9 @@ const AiConfiguration = () => {
                             }
                         />
 
+
                         <p className="mt-[4px] !text-[12px] !font-normal !leading-[18px] text-[#8c8c8c]">
-                            Example: openrouter/free
+                            Example: {provider.modelExample}
                         </p>
 
                     </div>
@@ -387,7 +592,8 @@ const AiConfiguration = () => {
                             label="Chat Completion URL"
                             name="url"
                             value={
-                                formData.url
+                                formData.url ||
+                                ""
                             }
                             onChange={
                                 handleChange
@@ -405,10 +611,11 @@ const AiConfiguration = () => {
                     <div className="mt-[14px]">
 
                         <Field
-                            label="OpenRouter Base URL"
+                            label={`${provider.name} Base URL`}
                             name="base_url"
                             value={
-                                formData.base_url
+                                formData.base_url ||
+                                ""
                             }
                             onChange={
                                 handleChange
@@ -421,7 +628,7 @@ const AiConfiguration = () => {
                     </div>
 
 
-                    {/* Security Notice */}
+                    {/* Security */}
 
                     <div className="mt-[16px] flex gap-[11px] rounded-[10px] border border-[#dde2e8] bg-[#fafbfc] px-[13px] py-[11px]">
 
@@ -440,9 +647,9 @@ const AiConfiguration = () => {
 
 
                             <p className="mt-[3px] !text-[12px] !font-normal !leading-[18px] text-[#9299a2]">
-                                The OpenRouter API key is encrypted before being stored.
-                                After saving, the key field stays blank and the existing
-                                key is preserved unless you enter a new one.
+                                The {provider.name} API key is encrypted before being stored.
+                                After saving, the key field stays blank and the existing key
+                                is preserved unless you enter a new one.
                             </p>
 
                         </div>
@@ -463,7 +670,6 @@ const AiConfiguration = () => {
                         }
                         className="flex h-[36px] min-w-[150px] items-center justify-center gap-[7px] rounded-[8px] bg-[#286bd7] px-[15px] !text-[13px] !font-semibold !leading-[20px] text-white transition hover:bg-[#1f60c8] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-
                         {saving ? (
                             <>
                                 <span className="h-[14px] w-[14px] animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -479,7 +685,6 @@ const AiConfiguration = () => {
                                 Save Configuration
                             </>
                         )}
-
                     </button>
 
                 </div>
@@ -514,9 +719,15 @@ const Field = ({
 
             <input
                 type="text"
-                name={name}
-                value={value}
-                onChange={onChange}
+                name={
+                    name
+                }
+                value={
+                    value
+                }
+                onChange={
+                    onChange
+                }
                 className={`h-[37px] w-full rounded-[8px] border bg-white px-[11px] !text-[13px] !font-normal !leading-[20px] text-[#555555] outline-none transition ${
                     error
                         ? "border-[#e45a5f]"

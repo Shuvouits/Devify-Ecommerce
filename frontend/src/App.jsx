@@ -30,6 +30,10 @@ import AiConfiguration from "./pages/admin/settings/AiConfiguration";
 import BrandIndex from "./pages/admin/brands/BrandIndex";
 import BrandCreate from "./pages/admin/brands/BrandCreate";
 import BrandEdit from "./pages/admin/brands/BrandEdit";
+import CategoryCreate from "./pages/admin/categories/CategoryCreate";
+import CategoryIndex from "./pages/admin/categories/CategoryIndex";
+import CategoryEdit from "./pages/admin/categories/CategoryEdit";
+
 
 
 const App = () => {
@@ -74,6 +78,12 @@ const App = () => {
                         <Route path="brands/create" element={<BrandCreate />} />
 
                         <Route path="brands/:id/edit" element={<BrandEdit />} />
+
+                        <Route  path="categories/create"  element={<CategoryCreate />} />
+
+                        <Route path="categories" element={<CategoryIndex />} />
+
+                        <Route path="categories/:id/edit" element={<CategoryEdit />} />
 
                     </Route>
 

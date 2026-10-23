@@ -18,12 +18,6 @@ import ImageStudioEffects from "./ImageStudioEffects";
 import ImageStudioQuickPrompt from "./ImageStudioQuickPrompt";
 
 
-/*
-|--------------------------------------------------------------------------
-| Default Effects
-|--------------------------------------------------------------------------
-*/
-
 const initialEffects = {
     brightness: 0,
     exposure: 0,
@@ -40,12 +34,6 @@ const CANVAS_WIDTH = 900;
 const CANVAS_HEIGHT = 520;
 
 
-/*
-|--------------------------------------------------------------------------
-| Brand Image Studio
-|--------------------------------------------------------------------------
-*/
-
 export default function BrandImageStudio({
     open,
     file,
@@ -53,17 +41,9 @@ export default function BrandImageStudio({
     onClose,
     onSave,
 }) {
-    /*
-    |--------------------------------------------------------------------------
-    | Refs
-    |--------------------------------------------------------------------------
-    */
+    const canvasRef = useRef(null);
 
-    const canvasRef =
-        useRef(null);
-
-    const imageRef =
-        useRef(null);
+    const imageRef = useRef(null);
 
     const transparentImageCanvasRef =
         useRef(null);
@@ -72,80 +52,64 @@ export default function BrandImageStudio({
         useRef(null);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | General State
-    |--------------------------------------------------------------------------
-    */
-
     const [
         tab,
         setTab,
-    ] =
-        useState("quick");
+    ] = useState("quick");
+
 
     const [
         effects,
         setEffects,
-    ] =
-        useState(
-            initialEffects
-        );
+    ] = useState(initialEffects);
+
 
     const [
         background,
         setBackground,
-    ] =
-        useState("white");
+    ] = useState("white");
+
 
     const [
         zoom,
         setZoom,
-    ] =
-        useState(100);
+    ] = useState(100);
+
 
     const [
         compare,
         setCompare,
-    ] =
-        useState(false);
+    ] = useState(false);
+
 
     const [
         backgroundRemoved,
         setBackgroundRemoved,
-    ] =
-        useState(false);
+    ] = useState(false);
+
 
     const [
         processingBackground,
         setProcessingBackground,
-    ] =
-        useState(false);
+    ] = useState(false);
+
 
     const [
         workingPreviewUrl,
         setWorkingPreviewUrl,
-    ] =
-        useState("");
+    ] = useState("");
+
 
     const [
         workingFile,
         setWorkingFile,
-    ] =
-        useState(null);
+    ] = useState(null);
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Reset Studio When Opened
-    |--------------------------------------------------------------------------
-    */
 
     useEffect(() => {
         if (!open) {
             return;
         }
-
 
         setWorkingPreviewUrl(
             previewUrl || ""
@@ -159,21 +123,10 @@ export default function BrandImageStudio({
             ...initialEffects,
         });
 
-        setBackground(
-            "white"
-        );
-
-        setZoom(
-            100
-        );
-
-        setCompare(
-            false
-        );
-
-        setBackgroundRemoved(
-            false
-        );
+        setBackground("white");
+        setZoom(100);
+        setCompare(false);
+        setBackgroundRemoved(false);
 
         transparentImageCanvasRef.current =
             null;
@@ -183,12 +136,6 @@ export default function BrandImageStudio({
         file,
     ]);
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cleanup Local Object URL
-    |--------------------------------------------------------------------------
-    */
 
     useEffect(() => {
         return () => {
@@ -203,12 +150,6 @@ export default function BrandImageStudio({
     }, []);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Load Source Image
-    |--------------------------------------------------------------------------
-    */
-
     useEffect(() => {
         if (
             !open ||
@@ -217,41 +158,33 @@ export default function BrandImageStudio({
             return;
         }
 
-
         const image =
             new Image();
 
+        image.onload = () => {
+            imageRef.current =
+                image;
 
-        image.onload =
-            () => {
-                imageRef.current =
-                    image;
+            transparentImageCanvasRef.current =
+                null;
 
-                transparentImageCanvasRef.current =
-                    null;
+            setBackgroundRemoved(
+                false
+            );
 
-                setBackgroundRemoved(
-                    false
-                );
+            requestAnimationFrame(
+                () => {
+                    renderCanvas();
+                }
+            );
+        };
 
-                renderCanvas();
-            };
+        image.onerror = () => {
+            console.error(
+                "Unable to load image into Image Studio."
+            );
+        };
 
-
-        image.onerror =
-            () => {
-                console.error(
-                    "Unable to load image into Image Studio."
-                );
-            };
-
-
-        /*
-         * Normally BrandEdit should give this component
-         * a local blob/object URL.
-         *
-         * If the URL is same-origin this also works.
-         */
         image.src =
             workingPreviewUrl;
     }, [
@@ -259,12 +192,6 @@ export default function BrandImageStudio({
         workingPreviewUrl,
     ]);
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Re-render Canvas
-    |--------------------------------------------------------------------------
-    */
 
     useEffect(() => {
         if (
@@ -283,161 +210,136 @@ export default function BrandImageStudio({
     ]);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Main Canvas Renderer
-    |--------------------------------------------------------------------------
-    */
+    const renderCanvas = () => {
+        const canvas =
+            canvasRef.current;
 
-    const renderCanvas =
-        () => {
-            const canvas =
-                canvasRef.current;
+        const image =
+            imageRef.current;
 
-            const image =
-                imageRef.current;
+        if (
+            !canvas ||
+            !image
+        ) {
+            return;
+        }
 
-
-            if (
-                !canvas ||
-                !image
-            ) {
-                return;
-            }
-
-
-            const context =
-                canvas.getContext(
-                    "2d",
-                    {
-                        willReadFrequently:
-                            true,
-                    }
-                );
-
-
-            canvas.width =
-                CANVAS_WIDTH;
-
-            canvas.height =
-                CANVAS_HEIGHT;
-
-
-            context.clearRect(
-                0,
-                0,
-                CANVAS_WIDTH,
-                CANVAS_HEIGHT
+        const context =
+            canvas.getContext(
+                "2d",
+                {
+                    willReadFrequently: true,
+                }
             );
 
+        if (!context) {
+            return;
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Compare Mode
-            |--------------------------------------------------------------------------
-            |
-            | Hold Compare button:
-            | show original source without modifications.
-            |
-            */
+        canvas.width =
+            CANVAS_WIDTH;
 
-            if (compare) {
-                drawBackground(
-                    context,
-                    CANVAS_WIDTH,
-                    CANVAS_HEIGHT,
-                    "white"
-                );
+        canvas.height =
+            CANVAS_HEIGHT;
 
 
-                drawSourceImage({
-                    context,
-                    source:
-                        image,
-                    canvasWidth:
-                        CANVAS_WIDTH,
-                    canvasHeight:
-                        CANVAS_HEIGHT,
-                    zoom,
-                    applyEffects:
-                        false,
-                    effects:
-                        initialEffects,
-                });
+        context.clearRect(
+            0,
+            0,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT
+        );
 
 
-                return;
-            }
+        context.imageSmoothingEnabled =
+            true;
+
+        context.imageSmoothingQuality =
+            "high";
+
+        context.globalAlpha =
+            1;
+
+        context.globalCompositeOperation =
+            "source-over";
+
+        context.filter =
+            "none";
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Draw Selected Background
-            |--------------------------------------------------------------------------
-            */
-
+        if (compare) {
             drawBackground(
                 context,
                 CANVAS_WIDTH,
                 CANVAS_HEIGHT,
-                background
+                "white"
             );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Source
-            |--------------------------------------------------------------------------
-            */
-
-            const source =
-                backgroundRemoved &&
-                transparentImageCanvasRef.current
-                    ? transparentImageCanvasRef.current
-                    : image;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Draw Image/Object With Effects
-            |--------------------------------------------------------------------------
-            */
 
             drawSourceImage({
                 context,
-                source,
+                source: image,
                 canvasWidth:
                     CANVAS_WIDTH,
                 canvasHeight:
                     CANVAS_HEIGHT,
                 zoom,
-                applyEffects:
-                    true,
-                effects,
+                applyEffects: false,
+                effects:
+                    initialEffects,
             });
-        };
+
+            return;
+        }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Background Preset Change
-    |--------------------------------------------------------------------------
-    |
-    | If the original image has its own opaque background,
-    | changing the canvas background alone cannot be seen.
-    |
-    | So selecting a preset first attempts to separate the
-    | foreground from the connected background.
-    |
-    */
+        drawBackground(
+            context,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT,
+            background
+        );
+
+
+        const source =
+            backgroundRemoved &&
+            transparentImageCanvasRef.current
+                ? transparentImageCanvasRef.current
+                : image;
+
+
+        drawSourceImage({
+            context,
+            source,
+            canvasWidth:
+                CANVAS_WIDTH,
+            canvasHeight:
+                CANVAS_HEIGHT,
+            zoom,
+            applyEffects: true,
+            effects,
+        });
+    };
+
 
     const handleBackgroundChange =
         async (type) => {
-            setBackground(
-                type
-            );
+            setBackground(type);
 
+            /*
+             * White background does not need
+             * automatic background removal.
+             */
+            if (
+                type ===
+                "white"
+            ) {
+                return;
+            }
 
+            /*
+             * Remove the original image background
+             * only once before applying another preset.
+             */
             if (
                 !backgroundRemoved &&
                 imageRef.current
@@ -449,27 +351,12 @@ export default function BrandImageStudio({
         };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Remove Background
-    |--------------------------------------------------------------------------
-    |
-    | Browser-only implementation.
-    |
-    | It starts from image borders and flood-fills through
-    | visually smooth connected areas. This works much better
-    | than "remove white only" for gradients and studio-style
-    | backgrounds.
-    |
-    */
-
     const removeBackground =
         async (
             silent = false
         ) => {
             const image =
                 imageRef.current;
-
 
             if (
                 !image ||
@@ -478,22 +365,17 @@ export default function BrandImageStudio({
                 return;
             }
 
-
             setProcessingBackground(
                 true
             );
 
-
             try {
                 /*
-                |--------------------------------------------------------------------------
-                | Limit Processing Size
-                |--------------------------------------------------------------------------
-                */
-
+                 * Preserve more of the original
+                 * image resolution while processing.
+                 */
                 const maxDimension =
-                    1400;
-
+                    2200;
 
                 const naturalWidth =
                     image.naturalWidth ||
@@ -503,8 +385,7 @@ export default function BrandImageStudio({
                     image.naturalHeight ||
                     image.height;
 
-
-                const scale =
+                const processingScale =
                     Math.min(
                         1,
                         maxDimension /
@@ -514,13 +395,12 @@ export default function BrandImageStudio({
                             )
                     );
 
-
                 const width =
                     Math.max(
                         1,
                         Math.round(
                             naturalWidth *
-                                scale
+                                processingScale
                         )
                     );
 
@@ -529,22 +409,15 @@ export default function BrandImageStudio({
                         1,
                         Math.round(
                             naturalHeight *
-                                scale
+                                processingScale
                         )
                     );
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Working Canvas
-                |--------------------------------------------------------------------------
-                */
 
                 const sourceCanvas =
                     document.createElement(
                         "canvas"
                     );
-
 
                 sourceCanvas.width =
                     width;
@@ -562,6 +435,12 @@ export default function BrandImageStudio({
                         }
                     );
 
+                if (!sourceContext) {
+                    throw new Error(
+                        "Unable to create image processing canvas."
+                    );
+                }
+
 
                 sourceContext.clearRect(
                     0,
@@ -569,6 +448,12 @@ export default function BrandImageStudio({
                     width,
                     height
                 );
+
+                sourceContext.imageSmoothingEnabled =
+                    true;
+
+                sourceContext.imageSmoothingQuality =
+                    "high";
 
 
                 sourceContext.drawImage(
@@ -588,33 +473,67 @@ export default function BrandImageStudio({
                         height
                     );
 
-
                 const data =
                     imageData.data;
 
 
                 /*
-                |--------------------------------------------------------------------------
-                | Flood Fill Connected Background
-                |--------------------------------------------------------------------------
-                */
+                 * If the logo is already a transparent
+                 * PNG/WebP, preserve it exactly.
+                 */
+                const transparentBorderRatio =
+                    getTransparentBorderRatio(
+                        data,
+                        width,
+                        height
+                    );
+
+                if (
+                    transparentBorderRatio >=
+                    0.55
+                ) {
+                    transparentImageCanvasRef.current =
+                        sourceCanvas;
+
+                    setBackgroundRemoved(
+                        true
+                    );
+
+                    requestAnimationFrame(
+                        () => {
+                            renderCanvas();
+                        }
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Detect the source background by
+                 * sampling the four corners.
+                 */
+                const cornerColors =
+                    getCornerBackgroundColors(
+                        data,
+                        width,
+                        height
+                    );
+
 
                 const totalPixels =
                     width *
                     height;
-
 
                 const visited =
                     new Uint8Array(
                         totalPixels
                     );
 
-
                 const queue =
                     new Int32Array(
                         totalPixels
                     );
-
 
                 let queueStart =
                     0;
@@ -623,69 +542,144 @@ export default function BrandImageStudio({
                     0;
 
 
-                const addPixel =
-                    (
-                        x,
-                        y
-                    ) => {
-                        if (
-                            x < 0 ||
-                            y < 0 ||
-                            x >= width ||
-                            y >= height
-                        ) {
-                            return;
-                        }
+                /*
+                 * Lower threshold = safer foreground.
+                 *
+                 * 28 removes pixels that are clearly
+                 * background.
+                 *
+                 * 60 gives a small feather zone around
+                 * anti-aliased edges.
+                 */
+                const solidBackgroundThreshold =
+                    28;
+
+                const featherEndThreshold =
+                    60;
 
 
-                        const pixelIndex =
+                const getDistance = (
+                    x,
+                    y
+                ) => {
+                    const pixelIndex =
+                        (
                             y *
                                 width +
-                            x;
+                            x
+                        ) *
+                        4;
+
+                    return getBackgroundDistance(
+                        data,
+                        pixelIndex,
+                        x,
+                        y,
+                        width,
+                        height,
+                        cornerColors
+                    );
+                };
 
 
-                        if (
-                            visited[
-                                pixelIndex
-                            ]
-                        ) {
-                            return;
-                        }
+                const addCandidate = (
+                    x,
+                    y
+                ) => {
+                    if (
+                        x < 0 ||
+                        y < 0 ||
+                        x >= width ||
+                        y >= height
+                    ) {
+                        return;
+                    }
 
+                    const pixel =
+                        y *
+                            width +
+                        x;
 
+                    if (
                         visited[
-                            pixelIndex
-                        ] =
-                            1;
+                            pixel
+                        ]
+                    ) {
+                        return;
+                    }
 
+                    const dataIndex =
+                        pixel *
+                        4;
+
+                    const alpha =
+                        data[
+                            dataIndex +
+                                3
+                        ];
+
+                    /*
+                     * Existing transparent pixel.
+                     */
+                    if (
+                        alpha <=
+                        10
+                    ) {
+                        visited[
+                            pixel
+                        ] = 1;
 
                         queue[
                             queueEnd
-                        ] =
-                            pixelIndex;
-
+                        ] = pixel;
 
                         queueEnd++;
-                    };
+
+                        return;
+                    }
+
+                    const distance =
+                        getDistance(
+                            x,
+                            y
+                        );
+
+                    /*
+                     * Do not enter logo/object pixels.
+                     */
+                    if (
+                        distance >
+                        featherEndThreshold
+                    ) {
+                        return;
+                    }
+
+                    visited[
+                        pixel
+                    ] = 1;
+
+                    queue[
+                        queueEnd
+                    ] = pixel;
+
+                    queueEnd++;
+                };
 
 
                 /*
-                |--------------------------------------------------------------------------
-                | Seed Entire Border
-                |--------------------------------------------------------------------------
-                */
-
+                 * Start only from outer border.
+                 */
                 for (
                     let x = 0;
                     x < width;
                     x++
                 ) {
-                    addPixel(
+                    addCandidate(
                         x,
                         0
                     );
 
-                    addPixel(
+                    addCandidate(
                         x,
                         height - 1
                     );
@@ -698,221 +692,134 @@ export default function BrandImageStudio({
                     height - 1;
                     y++
                 ) {
-                    addPixel(
+                    addCandidate(
                         0,
                         y
                     );
 
-                    addPixel(
+                    addCandidate(
                         width - 1,
                         y
                     );
                 }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Local Smoothness Threshold
-                |--------------------------------------------------------------------------
-                |
-                | Gradient backgrounds change slowly pixel-to-pixel.
-                | Logo/object edges normally change much faster.
-                |
-                */
-
-                const localTolerance =
-                    42;
-
-                const edgeBarrier =
-                    68;
-
-
                 while (
                     queueStart <
                     queueEnd
                 ) {
-                    const currentPixel =
+                    const pixel =
                         queue[
                             queueStart
                         ];
 
-
                     queueStart++;
 
 
-                    const currentX =
-                        currentPixel %
+                    const x =
+                        pixel %
                         width;
 
-                    const currentY =
+                    const y =
                         Math.floor(
-                            currentPixel /
+                            pixel /
                                 width
                         );
 
-
-                    const currentDataIndex =
-                        currentPixel *
+                    const dataIndex =
+                        pixel *
                         4;
 
+                    const originalAlpha =
+                        data[
+                            dataIndex +
+                                3
+                        ];
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Remove Background Pixel
-                    |--------------------------------------------------------------------------
-                    */
-
-                    data[
-                        currentDataIndex +
-                            3
-                    ] =
-                        0;
-
-
-                    const neighbours = [
-                        [
-                            currentX - 1,
-                            currentY,
-                        ],
-                        [
-                            currentX + 1,
-                            currentY,
-                        ],
-                        [
-                            currentX,
-                            currentY - 1,
-                        ],
-                        [
-                            currentX,
-                            currentY + 1,
-                        ],
-                    ];
+                    const distance =
+                        getDistance(
+                            x,
+                            y
+                        );
 
 
-                    for (
-                        const [
-                            nextX,
-                            nextY,
-                        ] of neighbours
+                    if (
+                        originalAlpha <=
+                        10
                     ) {
-                        if (
-                            nextX < 0 ||
-                            nextY < 0 ||
-                            nextX >=
-                                width ||
-                            nextY >=
-                                height
-                        ) {
-                            continue;
-                        }
-
-
-                        const nextPixel =
-                            nextY *
-                                width +
-                            nextX;
-
-
-                        if (
-                            visited[
-                                nextPixel
-                            ]
-                        ) {
-                            continue;
-                        }
-
-
-                        const nextDataIndex =
-                            nextPixel *
-                            4;
-
-
+                        data[
+                            dataIndex +
+                                3
+                        ] = 0;
+                    } else if (
+                        distance <=
+                        solidBackgroundThreshold
+                    ) {
                         /*
-                        |--------------------------------------------------------------------------
-                        | Transparent Pixels Are Background
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if (
-                            data[
-                                nextDataIndex +
-                                    3
-                            ] <
-                            10
-                        ) {
-                            visited[
-                                nextPixel
-                            ] =
-                                1;
-
-                            queue[
-                                queueEnd
-                            ] =
-                                nextPixel;
-
-                            queueEnd++;
-
-                            continue;
-                        }
-
-
+                         * True background.
+                         */
+                        data[
+                            dataIndex +
+                                3
+                        ] = 0;
+                    } else {
                         /*
-                        |--------------------------------------------------------------------------
-                        | Compare Current Pixel To Candidate
-                        |--------------------------------------------------------------------------
-                        */
-
-                        const localDistance =
-                            colorDistance(
-                                data,
-                                currentDataIndex,
-                                nextDataIndex
+                         * Small feather zone.
+                         *
+                         * This preserves smooth logo edges
+                         * without making the entire logo faded.
+                         */
+                        const progress =
+                            (
+                                distance -
+                                solidBackgroundThreshold
+                            ) /
+                            (
+                                featherEndThreshold -
+                                solidBackgroundThreshold
                             );
 
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Edge Strength
-                        |--------------------------------------------------------------------------
-                        */
-
-                        const candidateEdgeStrength =
-                            getPixelEdgeStrength(
-                                data,
-                                width,
-                                height,
-                                nextX,
-                                nextY
+                        const safeProgress =
+                            Math.max(
+                                0,
+                                Math.min(
+                                    1,
+                                    progress
+                                )
                             );
 
-
-                        if (
-                            localDistance <=
-                                localTolerance &&
-                            candidateEdgeStrength <=
-                                edgeBarrier
-                        ) {
-                            visited[
-                                nextPixel
-                            ] =
-                                1;
-
-                            queue[
-                                queueEnd
-                            ] =
-                                nextPixel;
-
-                            queueEnd++;
-                        }
+                        data[
+                            dataIndex +
+                                3
+                        ] =
+                            Math.round(
+                                originalAlpha *
+                                    safeProgress
+                            );
                     }
+
+
+                    addCandidate(
+                        x - 1,
+                        y
+                    );
+
+                    addCandidate(
+                        x + 1,
+                        y
+                    );
+
+                    addCandidate(
+                        x,
+                        y - 1
+                    );
+
+                    addCandidate(
+                        x,
+                        y + 1
+                    );
                 }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Put Transparent Result Back
-                |--------------------------------------------------------------------------
-                */
 
                 sourceContext.putImageData(
                     imageData,
@@ -930,10 +837,6 @@ export default function BrandImageStudio({
                 );
 
 
-                /*
-                 * React state render will also call renderCanvas,
-                 * but this makes the result feel instant.
-                 */
                 requestAnimationFrame(
                     () => {
                         renderCanvas();
@@ -944,7 +847,6 @@ export default function BrandImageStudio({
                     "Background removal failed:",
                     error
                 );
-
 
                 if (!silent) {
                     alert(
@@ -959,81 +861,47 @@ export default function BrandImageStudio({
         };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Enhance Image
-    |--------------------------------------------------------------------------
-    */
-
-    const enhanceImage =
-        () => {
-            setEffects({
-                brightness: 4,
-                exposure: 3,
-                contrast: 10,
-                highlights: -6,
-                shadows: 7,
-                vignette: 0,
-                saturation: 10,
-                warmth: 2,
-            });
-        };
+    const enhanceImage = () => {
+        setEffects({
+            brightness: 4,
+            exposure: 3,
+            contrast: 10,
+            highlights: -6,
+            shadows: 7,
+            vignette: 0,
+            saturation: 10,
+            warmth: 2,
+        });
+    };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reset Effects
-    |--------------------------------------------------------------------------
-    */
-
-    const resetEffects =
-        () => {
-            setEffects({
-                ...initialEffects,
-            });
-        };
+    const resetEffects = () => {
+        setEffects({
+            ...initialEffects,
+        });
+    };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Fit Image
-    |--------------------------------------------------------------------------
-    */
+    const fitImage = () => {
+        setZoom(100);
+    };
 
-    const fitImage =
-        () => {
-            setZoom(
-                100
-            );
-        };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Upload Different Image Inside Studio
-    |--------------------------------------------------------------------------
-    */
 
     const handleStudioUpload =
-        (
-            event
-        ) => {
+        (event) => {
             const selectedFile =
                 event.target
                     .files?.[0];
 
-
             if (!selectedFile) {
                 return;
             }
-
 
             const allowedTypes = [
                 "image/png",
                 "image/jpeg",
                 "image/webp",
             ];
-
 
             if (
                 !allowedTypes.includes(
@@ -1043,7 +911,6 @@ export default function BrandImageStudio({
                 return;
             }
 
-
             if (
                 localObjectUrlRef.current
             ) {
@@ -1052,16 +919,13 @@ export default function BrandImageStudio({
                 );
             }
 
-
             const objectUrl =
                 URL.createObjectURL(
                     selectedFile
                 );
 
-
             localObjectUrlRef.current =
                 objectUrl;
-
 
             setWorkingFile(
                 selectedFile
@@ -1085,177 +949,123 @@ export default function BrandImageStudio({
 
             transparentImageCanvasRef.current =
                 null;
+
+            event.target.value =
+                "";
         };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Save Edited File
-    |--------------------------------------------------------------------------
-    */
+    const saveImage = () => {
+        const canvas =
+            canvasRef.current;
 
-    const saveImage =
-        () => {
-            const canvas =
-                canvasRef.current;
+        if (!canvas) {
+            return;
+        }
 
+        canvas.toBlob(
+            (blob) => {
+                if (!blob) {
+                    return;
+                }
 
-            if (!canvas) {
-                return;
-            }
+                const originalName =
+                    workingFile?.name ||
+                    file?.name ||
+                    "brand-logo.png";
 
-
-            canvas.toBlob(
-                (
-                    blob
-                ) => {
-                    if (!blob) {
-                        return;
-                    }
-
-
-                    const originalName =
-                        workingFile?.name ||
-                        file?.name ||
-                        "brand-logo.png";
-
-
-                    const baseName =
-                        originalName.replace(
-                            /\.[^.]+$/,
-                            ""
-                        );
-
-
-                    const editedFile =
-                        new File(
-                            [
-                                blob,
-                            ],
-                            `${baseName}-edited.png`,
-                            {
-                                type:
-                                    "image/png",
-                            }
-                        );
-
-
-                    onSave(
-                        editedFile
-                    );
-                },
-                "image/png",
-                1
-            );
-        };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Export Image
-    |--------------------------------------------------------------------------
-    */
-
-    const exportImage =
-        () => {
-            const canvas =
-                canvasRef.current;
-
-
-            if (!canvas) {
-                return;
-            }
-
-
-            canvas.toBlob(
-                (
-                    blob
-                ) => {
-                    if (!blob) {
-                        return;
-                    }
-
-
-                    const url =
-                        URL.createObjectURL(
-                            blob
-                        );
-
-
-                    const link =
-                        document.createElement(
-                            "a"
-                        );
-
-
-                    link.href =
-                        url;
-
-                    link.download =
-                        "brand-image.png";
-
-
-                    document.body.appendChild(
-                        link
+                const baseName =
+                    originalName.replace(
+                        /\.[^.]+$/,
+                        ""
                     );
 
-
-                    link.click();
-
-
-                    document.body.removeChild(
-                        link
+                const editedFile =
+                    new File(
+                        [
+                            blob,
+                        ],
+                        `${baseName}-edited.png`,
+                        {
+                            type:
+                                "image/png",
+                        }
                     );
 
+                onSave(
+                    editedFile
+                );
+            },
+            "image/png",
+            1
+        );
+    };
 
-                    URL.revokeObjectURL(
-                        url
+
+    const exportImage = () => {
+        const canvas =
+            canvasRef.current;
+
+        if (!canvas) {
+            return;
+        }
+
+        canvas.toBlob(
+            (blob) => {
+                if (!blob) {
+                    return;
+                }
+
+                const url =
+                    URL.createObjectURL(
+                        blob
                     );
-                },
-                "image/png",
-                1
-            );
-        };
+
+                const link =
+                    document.createElement(
+                        "a"
+                    );
+
+                link.href =
+                    url;
+
+                link.download =
+                    "brand-image.png";
+
+                document.body.appendChild(
+                    link
+                );
+
+                link.click();
+
+                document.body.removeChild(
+                    link
+                );
+
+                URL.revokeObjectURL(
+                    url
+                );
+            },
+            "image/png",
+            1
+        );
+    };
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Close
-    |--------------------------------------------------------------------------
-    */
+    const handleClose = () => {
+        setCompare(false);
 
-    const handleClose =
-        () => {
-            setCompare(
-                false
-            );
+        onClose();
+    };
 
-
-            onClose();
-        };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Hidden State
-    |--------------------------------------------------------------------------
-    */
 
     if (!open) {
         return null;
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Render
-    |--------------------------------------------------------------------------
-    */
-
     return (
         <div className="fixed inset-0 z-[200] flex flex-col bg-[#f5f5f5]">
-
-            {/* Header */}
 
             <div className="flex h-[62px] shrink-0 items-center justify-between border-b border-[#e4e6e9] bg-white px-[24px]">
 
@@ -1309,11 +1119,7 @@ export default function BrandImageStudio({
             </div>
 
 
-            {/* Editor */}
-
             <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_315px] gap-[8px] p-[12px]">
-
-                {/* Media */}
 
                 <aside className="overflow-hidden rounded-[12px] border border-[#e0e3e7] bg-white">
 
@@ -1369,21 +1175,13 @@ export default function BrandImageStudio({
                 </aside>
 
 
-                {/* Main */}
-
                 <main className="flex min-w-0 flex-col gap-[8px]">
 
-                    {/* Main Canvas Card */}
-
                     <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-[#e0e3e7] bg-white">
-
-                        {/* Toolbar */}
 
                         <div className="flex h-[45px] shrink-0 items-center justify-between border-b border-[#e5e7ea] px-[10px]">
 
                             <div className="flex items-center gap-[6px]">
-
-                                {/* Zoom */}
 
                                 <div className="flex h-[32px] items-center overflow-hidden rounded-[9px] border border-[#e0e3e7] bg-white">
 
@@ -1438,8 +1236,6 @@ export default function BrandImageStudio({
                                 </div>
 
 
-                                {/* Fit */}
-
                                 <button
                                     type="button"
                                     onClick={
@@ -1454,8 +1250,6 @@ export default function BrandImageStudio({
                                     Fit
                                 </button>
 
-
-                                {/* Compare */}
 
                                 <button
                                     type="button"
@@ -1496,8 +1290,6 @@ export default function BrandImageStudio({
                             </div>
 
 
-                            {/* Save / Cancel */}
-
                             <div className="flex items-center gap-2">
 
                                 <button
@@ -1526,8 +1318,6 @@ export default function BrandImageStudio({
                         </div>
 
 
-                        {/* Canvas */}
-
                         <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[#f7f7f7] p-[18px]">
 
                             <canvas
@@ -1541,8 +1331,6 @@ export default function BrandImageStudio({
 
                     </div>
 
-
-                    {/* Bottom Tools */}
 
                     <div className="relative min-h-[170px] overflow-hidden rounded-[12px] border border-[#e0e3e7] bg-white p-[15px]">
 
@@ -1635,11 +1423,7 @@ export default function BrandImageStudio({
                 </main>
 
 
-                {/* Right Panel */}
-
                 <aside className="flex min-h-0 flex-col overflow-hidden rounded-[12px] border border-[#e0e3e7] bg-white">
-
-                    {/* Tabs */}
 
                     <div className="grid h-[43px] shrink-0 grid-cols-2 border-b border-[#e4e7eb]">
 
@@ -1662,7 +1446,7 @@ export default function BrandImageStudio({
                             Quick Prompt
 
                             {tab ===
-                                "quick" && (
+                            "quick" && (
                                 <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#316ff4]" />
                             )}
                         </button>
@@ -1687,15 +1471,13 @@ export default function BrandImageStudio({
                             Effects
 
                             {tab ===
-                                "effects" && (
+                            "effects" && (
                                 <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#316ff4]" />
                             )}
                         </button>
 
                     </div>
 
-
-                    {/* Tab Content */}
 
                     <div className="min-h-0 flex-1">
 
@@ -1736,12 +1518,6 @@ export default function BrandImageStudio({
     );
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Tool Button
-|--------------------------------------------------------------------------
-*/
 
 function ToolButton({
     label,
@@ -1788,12 +1564,6 @@ function ToolButton({
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Draw Image/Object
-|--------------------------------------------------------------------------
-*/
-
 function drawSourceImage({
     context,
     source,
@@ -1804,9 +1574,11 @@ function drawSourceImage({
     effects,
 }) {
     const sourceWidth =
+        source.naturalWidth ||
         source.width;
 
     const sourceHeight =
+        source.naturalHeight ||
         source.height;
 
 
@@ -1818,17 +1590,10 @@ function drawSourceImage({
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Object Rendering Canvas
-    |--------------------------------------------------------------------------
-    */
-
     const objectCanvas =
         document.createElement(
             "canvas"
         );
-
 
     objectCanvas.width =
         canvasWidth;
@@ -1846,12 +1611,29 @@ function drawSourceImage({
             }
         );
 
+    if (!objectContext) {
+        return;
+    }
+
 
     /*
-    |--------------------------------------------------------------------------
-    | Fit Image To Canvas
-    |--------------------------------------------------------------------------
-    */
+     * Important for sharp logo rendering.
+     */
+    objectContext.imageSmoothingEnabled =
+        true;
+
+    objectContext.imageSmoothingQuality =
+        "high";
+
+    objectContext.globalAlpha =
+        1;
+
+    objectContext.globalCompositeOperation =
+        "source-over";
+
+    objectContext.filter =
+        "none";
+
 
     const availableWidth =
         canvasWidth *
@@ -1913,12 +1695,6 @@ function drawSourceImage({
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Apply Effects To Object Layer Only
-    |--------------------------------------------------------------------------
-    */
-
     if (applyEffects) {
         applyPixelEffects(
             objectContext,
@@ -1929,25 +1705,34 @@ function drawSourceImage({
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Composite
-    |--------------------------------------------------------------------------
-    */
+    context.save();
+
+    context.imageSmoothingEnabled =
+        true;
+
+    context.imageSmoothingQuality =
+        "high";
+
+    context.globalAlpha =
+        1;
+
+    context.globalCompositeOperation =
+        "source-over";
+
+    context.filter =
+        "none";
+
 
     context.drawImage(
         objectCanvas,
         0,
         0
     );
+
+
+    context.restore();
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Background Renderer
-|--------------------------------------------------------------------------
-*/
 
 function drawBackground(
     context,
@@ -1955,11 +1740,17 @@ function drawBackground(
     height,
     type
 ) {
-    /*
-    |--------------------------------------------------------------------------
-    | Clean White
-    |--------------------------------------------------------------------------
-    */
+    context.save();
+
+    context.globalAlpha =
+        1;
+
+    context.globalCompositeOperation =
+        "source-over";
+
+    context.filter =
+        "none";
+
 
     if (
         type ===
@@ -1975,15 +1766,11 @@ function drawBackground(
             height
         );
 
+        context.restore();
+
         return;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Lifestyle Room
-    |--------------------------------------------------------------------------
-    */
 
     if (
         type ===
@@ -1998,7 +1785,6 @@ function drawBackground(
                     0.72
             );
 
-
         wall.addColorStop(
             0,
             "#f8f2e9"
@@ -2008,7 +1794,6 @@ function drawBackground(
             1,
             "#dce8df"
         );
-
 
         context.fillStyle =
             wall;
@@ -2031,7 +1816,6 @@ function drawBackground(
                 height
             );
 
-
         floor.addColorStop(
             0,
             "#d2c4b3"
@@ -2041,7 +1825,6 @@ function drawBackground(
             1,
             "#b29e88"
         );
-
 
         context.fillStyle =
             floor;
@@ -2056,9 +1839,6 @@ function drawBackground(
         );
 
 
-        /*
-         * Soft light
-         */
         const light =
             context.createRadialGradient(
                 width *
@@ -2074,7 +1854,6 @@ function drawBackground(
                     0.48
             );
 
-
         light.addColorStop(
             0,
             "rgba(255,255,255,0.85)"
@@ -2084,7 +1863,6 @@ function drawBackground(
             1,
             "rgba(255,255,255,0)"
         );
-
 
         context.fillStyle =
             light;
@@ -2096,16 +1874,11 @@ function drawBackground(
             height
         );
 
+        context.restore();
 
         return;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Desk Setup
-    |--------------------------------------------------------------------------
-    */
 
     if (
         type ===
@@ -2119,7 +1892,6 @@ function drawBackground(
                 height
             );
 
-
         wall.addColorStop(
             0,
             "#f1f3f5"
@@ -2129,7 +1901,6 @@ function drawBackground(
             1,
             "#b9c2cc"
         );
-
 
         context.fillStyle =
             wall;
@@ -2169,16 +1940,11 @@ function drawBackground(
                 0.38
         );
 
+        context.restore();
 
         return;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Gradient Studio
-    |--------------------------------------------------------------------------
-    */
 
     if (
         type ===
@@ -2191,7 +1957,6 @@ function drawBackground(
                 width,
                 height
             );
-
 
         gradient.addColorStop(
             0,
@@ -2207,7 +1972,6 @@ function drawBackground(
             1,
             "#fce7f3"
         );
-
 
         context.fillStyle =
             gradient;
@@ -2235,7 +1999,6 @@ function drawBackground(
                     0.5
             );
 
-
         glow.addColorStop(
             0,
             "rgba(255,255,255,0.6)"
@@ -2245,7 +2008,6 @@ function drawBackground(
             1,
             "rgba(255,255,255,0)"
         );
-
 
         context.fillStyle =
             glow;
@@ -2257,16 +2019,11 @@ function drawBackground(
             height
         );
 
+        context.restore();
 
         return;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Neon Accent
-    |--------------------------------------------------------------------------
-    */
 
     if (
         type ===
@@ -2279,7 +2036,6 @@ function drawBackground(
                 width,
                 height
             );
-
 
         gradient.addColorStop(
             0,
@@ -2295,7 +2051,6 @@ function drawBackground(
             1,
             "#9d174d"
         );
-
 
         context.fillStyle =
             gradient;
@@ -2323,7 +2078,6 @@ function drawBackground(
                     0.35
             );
 
-
         cyanGlow.addColorStop(
             0,
             "rgba(34,211,238,0.35)"
@@ -2333,7 +2087,6 @@ function drawBackground(
             1,
             "rgba(34,211,238,0)"
         );
-
 
         context.fillStyle =
             cyanGlow;
@@ -2361,7 +2114,6 @@ function drawBackground(
                     0.35
             );
 
-
         pinkGlow.addColorStop(
             0,
             "rgba(236,72,153,0.45)"
@@ -2371,7 +2123,6 @@ function drawBackground(
             1,
             "rgba(236,72,153,0)"
         );
-
 
         context.fillStyle =
             pinkGlow;
@@ -2383,16 +2134,11 @@ function drawBackground(
             height
         );
 
+        context.restore();
 
         return;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Fallback
-    |--------------------------------------------------------------------------
-    */
 
     context.fillStyle =
         "#ffffff";
@@ -2403,14 +2149,10 @@ function drawBackground(
         width,
         height
     );
+
+    context.restore();
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Pixel Effects
-|--------------------------------------------------------------------------
-*/
 
 function applyPixelEffects(
     context,
@@ -2419,7 +2161,6 @@ function applyPixelEffects(
     effects
 ) {
     let imageData;
-
 
     try {
         imageData =
@@ -2476,9 +2217,6 @@ function applyPixelEffects(
         data.length;
         index += 4
     ) {
-        /*
-         * Do not process transparent pixels.
-         */
         if (
             data[
                 index + 3
@@ -2502,16 +2240,9 @@ function applyPixelEffects(
             ];
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Brightness
-        |--------------------------------------------------------------------------
-        */
-
         const brightness =
             effects.brightness *
             1.5;
-
 
         red +=
             brightness;
@@ -2523,19 +2254,12 @@ function applyPixelEffects(
             brightness;
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Exposure
-        |--------------------------------------------------------------------------
-        */
-
         const exposureMultiplier =
             Math.pow(
                 2,
                 effects.exposure /
                     100
             );
-
 
         red *=
             exposureMultiplier;
@@ -2546,12 +2270,6 @@ function applyPixelEffects(
         blue *=
             exposureMultiplier;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Contrast
-        |--------------------------------------------------------------------------
-        */
 
         red =
             contrastFactor *
@@ -2578,12 +2296,6 @@ function applyPixelEffects(
             128;
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Luminance
-        |--------------------------------------------------------------------------
-        */
-
         const luminance =
             0.299 *
                 red +
@@ -2592,12 +2304,6 @@ function applyPixelEffects(
             0.114 *
                 blue;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Highlights
-        |--------------------------------------------------------------------------
-        */
 
         if (
             effects.highlights !==
@@ -2613,12 +2319,10 @@ function applyPixelEffects(
                     2
                 );
 
-
             const highlightAdjustment =
                 effects.highlights *
                 0.75 *
                 highlightWeight;
-
 
             red +=
                 highlightAdjustment;
@@ -2630,12 +2334,6 @@ function applyPixelEffects(
                 highlightAdjustment;
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Shadows
-        |--------------------------------------------------------------------------
-        */
 
         if (
             effects.shadows !==
@@ -2652,12 +2350,10 @@ function applyPixelEffects(
                     2
                 );
 
-
             const shadowAdjustment =
                 effects.shadows *
                 0.75 *
                 shadowWeight;
-
 
             red +=
                 shadowAdjustment;
@@ -2669,12 +2365,6 @@ function applyPixelEffects(
                 shadowAdjustment;
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Saturation
-        |--------------------------------------------------------------------------
-        */
 
         const gray =
             0.299 *
@@ -2716,16 +2406,9 @@ function applyPixelEffects(
                 saturation;
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Warmth
-        |--------------------------------------------------------------------------
-        */
-
         const warmth =
             effects.warmth *
             0.55;
-
 
         red +=
             warmth;
@@ -2737,12 +2420,6 @@ function applyPixelEffects(
         blue -=
             warmth;
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Clamp
-        |--------------------------------------------------------------------------
-        */
 
         data[index] =
             clamp(
@@ -2772,12 +2449,6 @@ function applyPixelEffects(
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Vignette
-    |--------------------------------------------------------------------------
-    */
-
     if (
         effects.vignette >
         0
@@ -2800,12 +2471,10 @@ function applyPixelEffects(
                     0.68
             );
 
-
         gradient.addColorStop(
             0,
             "rgba(0,0,0,0)"
         );
-
 
         gradient.addColorStop(
             1,
@@ -2815,10 +2484,8 @@ function applyPixelEffects(
             })`
         );
 
-
         context.fillStyle =
             gradient;
-
 
         context.fillRect(
             0,
@@ -2830,136 +2497,477 @@ function applyPixelEffects(
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Background Detection Helpers
-|--------------------------------------------------------------------------
-*/
-
-function colorDistance(
+function getTransparentBorderRatio(
     data,
-    indexA,
-    indexB
+    width,
+    height
 ) {
-    const red =
-        data[indexA] -
-        data[indexB];
+    let transparent =
+        0;
 
-    const green =
-        data[
-            indexA + 1
-        ] -
-        data[
-            indexB + 1
-        ];
-
-    const blue =
-        data[
-            indexA + 2
-        ] -
-        data[
-            indexB + 2
-        ];
+    let total =
+        0;
 
 
-    return Math.sqrt(
-        red * red +
-        green * green +
-        blue * blue
+    const checkPixel = (
+        x,
+        y
+    ) => {
+        const index =
+            (
+                y *
+                    width +
+                x
+            ) *
+                4 +
+            3;
+
+        total++;
+
+        if (
+            data[index] <=
+            20
+        ) {
+            transparent++;
+        }
+    };
+
+
+    for (
+        let x = 0;
+        x < width;
+        x++
+    ) {
+        checkPixel(
+            x,
+            0
+        );
+
+        checkPixel(
+            x,
+            height - 1
+        );
+    }
+
+
+    for (
+        let y = 1;
+        y <
+        height - 1;
+        y++
+    ) {
+        checkPixel(
+            0,
+            y
+        );
+
+        checkPixel(
+            width - 1,
+            y
+        );
+    }
+
+
+    if (!total) {
+        return 0;
+    }
+
+
+    return (
+        transparent /
+        total
     );
 }
 
 
-function getPixelEdgeStrength(
+function getCornerBackgroundColors(
     data,
     width,
-    height,
-    x,
-    y
+    height
 ) {
-    const centerPixel =
-        (
-            y *
-                width +
-            x
-        ) *
-        4;
+    const patchSize =
+        Math.max(
+            3,
+            Math.min(
+                18,
+                Math.round(
+                    Math.min(
+                        width,
+                        height
+                    ) *
+                        0.035
+                )
+            )
+        );
 
 
-    let maximumDistance =
-        0;
-
-
-    const neighbours = [
-        [
-            x - 1,
-            y,
-        ],
-        [
-            x + 1,
-            y,
-        ],
-        [
-            x,
-            y - 1,
-        ],
-        [
-            x,
-            y + 1,
-        ],
-    ];
-
-
-    for (
-        const [
-            nextX,
-            nextY,
-        ] of neighbours
-    ) {
-        if (
-            nextX < 0 ||
-            nextY < 0 ||
-            nextX >= width ||
-            nextY >= height
-        ) {
-            continue;
-        }
-
-
-        const neighbourPixel =
-            (
-                nextY *
-                    width +
-                nextX
-            ) *
-            4;
-
-
-        const distance =
-            colorDistance(
+    return {
+        topLeft:
+            sampleCornerColor(
                 data,
-                centerPixel,
-                neighbourPixel
-            );
+                width,
+                height,
+                0,
+                0,
+                patchSize
+            ),
 
+        topRight:
+            sampleCornerColor(
+                data,
+                width,
+                height,
+                width -
+                    patchSize,
+                0,
+                patchSize
+            ),
 
-        maximumDistance =
-            Math.max(
-                maximumDistance,
-                distance
-            );
-    }
+        bottomLeft:
+            sampleCornerColor(
+                data,
+                width,
+                height,
+                0,
+                height -
+                    patchSize,
+                patchSize
+            ),
 
-
-    return maximumDistance;
+        bottomRight:
+            sampleCornerColor(
+                data,
+                width,
+                height,
+                width -
+                    patchSize,
+                height -
+                    patchSize,
+                patchSize
+            ),
+    };
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Clamp
-|--------------------------------------------------------------------------
-*/
+function sampleCornerColor(
+    data,
+    width,
+    height,
+    startX,
+    startY,
+    size
+) {
+    const reds = [];
+    const greens = [];
+    const blues = [];
+
+
+    const endX =
+        Math.min(
+            width,
+            startX +
+                size
+        );
+
+    const endY =
+        Math.min(
+            height,
+            startY +
+                size
+        );
+
+
+    for (
+        let y =
+            Math.max(
+                0,
+                startY
+            );
+        y < endY;
+        y++
+    ) {
+        for (
+            let x =
+                Math.max(
+                    0,
+                    startX
+                );
+            x < endX;
+            x++
+        ) {
+            const index =
+                (
+                    y *
+                        width +
+                    x
+                ) *
+                4;
+
+            const alpha =
+                data[
+                    index +
+                        3
+                ];
+
+            if (
+                alpha <=
+                20
+            ) {
+                continue;
+            }
+
+            reds.push(
+                data[index]
+            );
+
+            greens.push(
+                data[
+                    index +
+                        1
+                ]
+            );
+
+            blues.push(
+                data[
+                    index +
+                        2
+                ]
+            );
+        }
+    }
+
+
+    if (!reds.length) {
+        return {
+            red: 255,
+            green: 255,
+            blue: 255,
+        };
+    }
+
+
+    return {
+        red:
+            median(
+                reds
+            ),
+
+        green:
+            median(
+                greens
+            ),
+
+        blue:
+            median(
+                blues
+            ),
+    };
+}
+
+
+function getExpectedBackgroundColor(
+    x,
+    y,
+    width,
+    height,
+    corners
+) {
+    const horizontal =
+        width > 1
+            ? x /
+                (
+                    width -
+                    1
+                )
+            : 0;
+
+    const vertical =
+        height > 1
+            ? y /
+                (
+                    height -
+                    1
+                )
+            : 0;
+
+
+    const topRed =
+        lerp(
+            corners.topLeft.red,
+            corners.topRight.red,
+            horizontal
+        );
+
+    const topGreen =
+        lerp(
+            corners.topLeft.green,
+            corners.topRight.green,
+            horizontal
+        );
+
+    const topBlue =
+        lerp(
+            corners.topLeft.blue,
+            corners.topRight.blue,
+            horizontal
+        );
+
+
+    const bottomRed =
+        lerp(
+            corners.bottomLeft.red,
+            corners.bottomRight.red,
+            horizontal
+        );
+
+    const bottomGreen =
+        lerp(
+            corners.bottomLeft.green,
+            corners.bottomRight.green,
+            horizontal
+        );
+
+    const bottomBlue =
+        lerp(
+            corners.bottomLeft.blue,
+            corners.bottomRight.blue,
+            horizontal
+        );
+
+
+    return {
+        red:
+            lerp(
+                topRed,
+                bottomRed,
+                vertical
+            ),
+
+        green:
+            lerp(
+                topGreen,
+                bottomGreen,
+                vertical
+            ),
+
+        blue:
+            lerp(
+                topBlue,
+                bottomBlue,
+                vertical
+            ),
+    };
+}
+
+
+function getBackgroundDistance(
+    data,
+    index,
+    x,
+    y,
+    width,
+    height,
+    corners
+) {
+    const expected =
+        getExpectedBackgroundColor(
+            x,
+            y,
+            width,
+            height,
+            corners
+        );
+
+
+    const red =
+        data[index] -
+        expected.red;
+
+    const green =
+        data[
+            index +
+                1
+        ] -
+        expected.green;
+
+    const blue =
+        data[
+            index +
+                2
+        ] -
+        expected.blue;
+
+
+    return Math.sqrt(
+        red *
+            red +
+        green *
+            green +
+        blue *
+            blue
+    );
+}
+
+
+function median(
+    values
+) {
+    const sorted =
+        [
+            ...values,
+        ].sort(
+            (
+                first,
+                second
+            ) =>
+                first -
+                second
+        );
+
+    const middle =
+        Math.floor(
+            sorted.length /
+                2
+        );
+
+    if (
+        sorted.length %
+            2 ===
+        0
+    ) {
+        return (
+            sorted[
+                middle -
+                    1
+            ] +
+            sorted[
+                middle
+            ]
+        ) /
+            2;
+    }
+
+    return sorted[
+        middle
+    ];
+}
+
+
+function lerp(
+    start,
+    end,
+    amount
+) {
+    return (
+        start +
+        (
+            end -
+            start
+        ) *
+            amount
+    );
+}
+
 
 function clamp(
     value

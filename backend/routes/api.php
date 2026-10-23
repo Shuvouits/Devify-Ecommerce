@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\Admin\BrandAiController;
 use App\Http\Controllers\Api\Admin\BrandAiImageController;
 use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\BrandSeoController;
+use App\Http\Controllers\Api\Admin\CategoryAiController;
+use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\Settings\AiImageModelController;
 use App\Http\Controllers\Api\Admin\Settings\AiSettingController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -67,74 +69,75 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
 
 
     Route::prefix('brands')->group(function () {
-    /*
-    |--------------------------------------------------------------------------
-    | AI
-    |--------------------------------------------------------------------------
-    */
-
-    Route::post('/ai/description', [BrandAiController::class, 'generateDescription']);
-    Route::post('/ai/seo', [BrandAiController::class, 'generateSeo']);
-    Route::post('/seo/analyze', [BrandSeoController::class, 'analyze']);
-    Route::post('/ai/image', [BrandAiImageController::class, 'generate']);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Brand List / Create
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/', [BrandController::class, 'index']);
-    Route::post('/', [BrandController::class, 'store']);
+        Route::post('/ai/description', [BrandAiController::class, 'generateDescription']);
+        Route::post('/ai/seo', [BrandAiController::class, 'generateSeo']);
+        Route::post('/seo/analyze', [BrandSeoController::class, 'analyze']);
+        Route::post('/ai/image', [BrandAiImageController::class, 'generate']);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Brand Logo Source
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/{id}/logo-source', [BrandController::class, 'logoSource']);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Brand Show / Update
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/{id}', [BrandController::class, 'show']);
-    Route::put('/{id}', [BrandController::class, 'update']);
+        Route::get('/', [BrandController::class, 'index']);
+        Route::post('/', [BrandController::class, 'store']);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Brand Logo
-    |--------------------------------------------------------------------------
-    */
-
-    Route::post('/{id}/logo', [BrandController::class, 'uploadLogo']);
-    Route::delete('/{id}/logo', [BrandController::class, 'deleteLogo']);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Archive / Restore
-    |--------------------------------------------------------------------------
-    */
-
-    Route::patch('/{id}/archive', [BrandController::class, 'archive']);
-    Route::patch('/{id}/restore', [BrandController::class, 'restore']);
+        Route::get('/{id}/logo-source', [BrandController::class, 'logoSource']);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Delete
-    |--------------------------------------------------------------------------
-    */
 
-    Route::delete('/{id}', [BrandController::class, 'destroy']);
+        Route::get('/{id}', [BrandController::class, 'show']);
+        Route::put('/{id}', [BrandController::class, 'update']);
+
+
+
+        Route::post('/{id}/logo', [BrandController::class, 'uploadLogo']);
+        Route::delete('/{id}/logo', [BrandController::class, 'deleteLogo']);
+
+
+
+
+        Route::patch('/{id}/archive', [BrandController::class, 'archive']);
+        Route::patch('/{id}/restore', [BrandController::class, 'restore']);
+
+
+
+        Route::delete('/{id}', [BrandController::class, 'destroy']);
+    });
+});
+
+
+
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+
+
+   Route::prefix('categories')->group(function () {
+    Route::post('/ai/description', [CategoryAiController::class, 'generateDescription']);
+    Route::post('/ai/seo', [CategoryAiController::class, 'generateSeo']);
+
+    Route::get('/parent-options', [CategoryController::class, 'parentOptions']);
+    Route::get('/', [CategoryController::class, 'index']);
+    Route::post('/', [CategoryController::class, 'store']);
+
+    Route::post('/{id}/image', [CategoryController::class, 'uploadImage']);
+    Route::delete('/{id}/image', [CategoryController::class, 'deleteImage']);
+
+    Route::post('/{id}/icon', [CategoryController::class, 'uploadIcon']);
+    Route::delete('/{id}/icon', [CategoryController::class, 'deleteIcon']);
+
+    Route::patch('/{id}/trash/restore', [CategoryController::class, 'restoreDeleted']);
+    Route::delete('/{id}/trash/force', [CategoryController::class, 'forceDestroy']);
+
+    Route::get('/{id}', [CategoryController::class, 'show']);
+    Route::put('/{id}', [CategoryController::class, 'update']);
+
+    Route::patch('/{id}/archive', [CategoryController::class, 'archive']);
+    Route::patch('/{id}/restore', [CategoryController::class, 'restore']);
+
+    Route::delete('/{id}', [CategoryController::class, 'destroy']);
 });
 
 
