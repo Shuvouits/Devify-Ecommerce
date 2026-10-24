@@ -4,12 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\Admin\CategoryRepository;
 use App\Repositories\Admin\CategoryRepositoryInterface;
+use App\Repositories\Admin\LocationRepository;
+use App\Repositories\Admin\LocationRepositoryInterface;
 use App\Repositories\Ai\AiSettingRepository;
 use App\Repositories\Ai\AiSettingRepositoryInterface;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Notifications\Messages\MailMessage;
-
 use App\Repositories\Auth\AuthRepository;
 use App\Repositories\Auth\AuthRepositoryInterface;
 use App\Repositories\Auth\Social\SocialAccountRepository;
@@ -25,6 +23,9 @@ use App\Repositories\Settings\SocialLogin\SocialLoginRepositoryInterface;
 use App\Repositories\TwoFactor\TwoFactorRepository;
 use App\Repositories\TwoFactor\TwoFactorRepositoryInterface;
 use App\Services\Mail\DynamicMailConfigService;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -73,12 +74,15 @@ class AppServiceProvider extends ServiceProvider
             BrandRepository::class
         );
 
-         $this->app->bind(
-        CategoryRepositoryInterface::class,
-        CategoryRepository::class
-    );
+        $this->app->bind(
+            CategoryRepositoryInterface::class,
+            CategoryRepository::class
+        );
 
-
+        $this->app->bind(
+            LocationRepositoryInterface::class,
+            LocationRepository::class
+        );
     }
 
     /**

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\TwoFactorController;
+use App\Http\Controllers\Api\Admin\LocationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -114,32 +115,48 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
 Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
 
 
-   Route::prefix('categories')->group(function () {
-    Route::post('/ai/description', [CategoryAiController::class, 'generateDescription']);
-    Route::post('/ai/seo', [CategoryAiController::class, 'generateSeo']);
+    Route::prefix('categories')->group(function () {
+        Route::post('/ai/description', [CategoryAiController::class, 'generateDescription']);
+        Route::post('/ai/seo', [CategoryAiController::class, 'generateSeo']);
 
-    Route::get('/parent-options', [CategoryController::class, 'parentOptions']);
-    Route::get('/', [CategoryController::class, 'index']);
-    Route::post('/', [CategoryController::class, 'store']);
+        Route::get('/parent-options', [CategoryController::class, 'parentOptions']);
+        Route::get('/', [CategoryController::class, 'index']);
+        Route::post('/', [CategoryController::class, 'store']);
 
-    Route::post('/{id}/image', [CategoryController::class, 'uploadImage']);
-    Route::delete('/{id}/image', [CategoryController::class, 'deleteImage']);
+        Route::post('/{id}/image', [CategoryController::class, 'uploadImage']);
+        Route::delete('/{id}/image', [CategoryController::class, 'deleteImage']);
 
-    Route::post('/{id}/icon', [CategoryController::class, 'uploadIcon']);
-    Route::delete('/{id}/icon', [CategoryController::class, 'deleteIcon']);
+        Route::post('/{id}/icon', [CategoryController::class, 'uploadIcon']);
+        Route::delete('/{id}/icon', [CategoryController::class, 'deleteIcon']);
 
-    Route::patch('/{id}/trash/restore', [CategoryController::class, 'restoreDeleted']);
-    Route::delete('/{id}/trash/force', [CategoryController::class, 'forceDestroy']);
+        Route::patch('/{id}/trash/restore', [CategoryController::class, 'restoreDeleted']);
+        Route::delete('/{id}/trash/force', [CategoryController::class, 'forceDestroy']);
 
-    Route::get('/{id}', [CategoryController::class, 'show']);
-    Route::put('/{id}', [CategoryController::class, 'update']);
+        Route::get('/{id}', [CategoryController::class, 'show']);
+        Route::put('/{id}', [CategoryController::class, 'update']);
 
-    Route::patch('/{id}/archive', [CategoryController::class, 'archive']);
-    Route::patch('/{id}/restore', [CategoryController::class, 'restore']);
+        Route::patch('/{id}/archive', [CategoryController::class, 'archive']);
+        Route::patch('/{id}/restore', [CategoryController::class, 'restore']);
 
-    Route::delete('/{id}', [CategoryController::class, 'destroy']);
+        Route::delete('/{id}', [CategoryController::class, 'destroy']);
+    });
 });
 
 
 
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+    Route::prefix('locations')->group(function () {
+        Route::get('/', [LocationController::class, 'index']);
+        Route::post('/', [LocationController::class, 'store']);
+
+        Route::get('/delivery-order', [LocationController::class, 'deliveryOrder']);
+        Route::put('/delivery-order', [LocationController::class, 'updateDeliveryOrder']);
+
+        Route::patch('/default', [LocationController::class, 'setDefault']);
+
+        Route::get('/{id}', [LocationController::class, 'show']);
+        Route::put('/{id}', [LocationController::class, 'update']);
+
+        Route::delete('/{id}', [LocationController::class, 'destroy']);
+    });
 });
