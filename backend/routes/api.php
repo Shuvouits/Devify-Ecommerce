@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\BrandSeoController;
 use App\Http\Controllers\Api\Admin\CategoryAiController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\Admin\GlobalVariantController;
 use App\Http\Controllers\Api\Admin\Settings\AiImageModelController;
 use App\Http\Controllers\Api\Admin\Settings\AiSettingController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -159,4 +160,25 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
 
         Route::delete('/{id}', [LocationController::class, 'destroy']);
     });
+});
+
+
+
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+
+
+    Route::prefix('global-variants')->group(function () {
+        Route::get('/', [GlobalVariantController::class, 'index']);
+
+        Route::get('/ordered', [GlobalVariantController::class, 'ordered']);
+
+        Route::post('/', [GlobalVariantController::class, 'store']);
+
+        Route::get('/{id}', [GlobalVariantController::class, 'show']);
+
+        Route::put('/{id}', [GlobalVariantController::class, 'update']);
+
+        Route::delete('/{id}', [GlobalVariantController::class, 'destroy']);
+    });
+    
 });

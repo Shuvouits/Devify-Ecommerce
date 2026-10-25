@@ -39,6 +39,7 @@ import CategoryEdit from "./pages/admin/categories/CategoryEdit";
 
 import LocationIndex from "./pages/admin/locations/LocationIndex";
 import LocationSettings from "./pages/admin/locations/LocationSettings";
+import GlobalVariantIndex from "./pages/admin/products/global-variants/GlobalVariantIndex";
 
 const App = () => {
     return (
@@ -77,6 +78,9 @@ const App = () => {
                         <Route path="categories/:id/edit" element={<CategoryEdit />} />
                         <Route path="locations" element={<LocationIndex />} />
                         <Route path="locations/settings" element={<LocationSettings />} />
+
+                        <Route path="global-variants" element={<GlobalVariantIndex />} />
+
                     </Route>
 
                     <Route path="/admin/settings" element={<AdminSettingsLayout />}>

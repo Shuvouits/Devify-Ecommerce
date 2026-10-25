@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\Admin\CategoryRepository;
 use App\Repositories\Admin\CategoryRepositoryInterface;
+use App\Repositories\Admin\GlobalVariantRepository;
+use App\Repositories\Admin\GlobalVariantRepositoryInterface;
 use App\Repositories\Admin\LocationRepository;
 use App\Repositories\Admin\LocationRepositoryInterface;
 use App\Repositories\Ai\AiSettingRepository;
@@ -82,6 +84,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             LocationRepositoryInterface::class,
             LocationRepository::class
+        );
+
+        $this->app->bind(
+            GlobalVariantRepositoryInterface::class,
+            GlobalVariantRepository::class
         );
     }
 

@@ -27,6 +27,7 @@ const EMPTY_FORM = {
     ships_online_orders: false,
     sells_over_counter: false,
     receives_returns: false,
+    is_default: false,
     status: "active",
 };
 
@@ -119,7 +120,7 @@ export default function LocationIndex() {
                 showToast(
                     error?.response?.data
                         ?.message ||
-                        "Unable to load locations."
+                    "Unable to load locations."
                 );
             } finally {
                 setLoading(false);
@@ -205,9 +206,16 @@ export default function LocationIndex() {
                         .receives_returns
                 ),
 
+            is_default:
+                Boolean(
+                    location.is_default
+                ),
+
             status:
                 location.status ||
                 "active",
+
+
         });
 
         setErrors({});
@@ -342,7 +350,7 @@ export default function LocationIndex() {
                 showToast(
                     error?.response?.data
                         ?.message ||
-                        "Unable to save location."
+                    "Unable to save location."
                 );
             } finally {
                 setSaving(false);
@@ -373,10 +381,9 @@ export default function LocationIndex() {
                 );
 
                 showToast(
-                    `${location.name} ${
-                        nextStatus === "active"
-                            ? "activated"
-                            : "deactivated"
+                    `${location.name} ${nextStatus === "active"
+                        ? "activated"
+                        : "deactivated"
                     } successfully.`
                 );
 
@@ -389,10 +396,10 @@ export default function LocationIndex() {
 
                 showToast(
                     statusError ||
-                        error?.response
-                            ?.data
-                            ?.message ||
-                        "Unable to update location status."
+                    error?.response
+                        ?.data
+                        ?.message ||
+                    "Unable to update location status."
                 );
             }
         };
@@ -435,10 +442,10 @@ export default function LocationIndex() {
 
                 showToast(
                     locationError ||
-                        error?.response
-                            ?.data
-                            ?.message ||
-                        "Unable to delete location."
+                    error?.response
+                        ?.data
+                        ?.message ||
+                    "Unable to delete location."
                 );
             } finally {
                 setDeleting(false);

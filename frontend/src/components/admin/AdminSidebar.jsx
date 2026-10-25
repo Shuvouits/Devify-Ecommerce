@@ -45,7 +45,7 @@ const productItems = [
     },
     {
         label: "Global Variants",
-        path: "/admin/products/global-variants",
+        path: "/admin/global-variants",
     },
     {
         label: "Collections",
