@@ -40,6 +40,10 @@ import CategoryEdit from "./pages/admin/categories/CategoryEdit";
 import LocationIndex from "./pages/admin/locations/LocationIndex";
 import LocationSettings from "./pages/admin/locations/LocationSettings";
 import GlobalVariantIndex from "./pages/admin/products/global-variants/GlobalVariantIndex";
+import ProductIndex from "./pages/admin/products/products/ProductIndex";
+import ProductForm from "./pages/admin/products/products/ProductForm";
+import CollectionIndex from "./pages/admin/products/collections/CollectionIndex";
+import CollectionForm from "./pages/admin/products/collections/CollectionForm";
 
 const App = () => {
     return (
@@ -80,6 +84,14 @@ const App = () => {
                         <Route path="locations/settings" element={<LocationSettings />} />
 
                         <Route path="global-variants" element={<GlobalVariantIndex />} />
+
+                        <Route path="products" element={<ProductIndex />} />
+                        <Route path="products/create" element={<ProductForm />} />
+                        <Route path="products/:id/edit" element={<ProductForm />} />
+
+                        <Route path="collections" element={<CollectionIndex />} />
+<Route path="collections/create" element={<CollectionForm />} />
+<Route path="collections/:id/edit" element={<CollectionForm />} />
 
                     </Route>
 

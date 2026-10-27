@@ -49,7 +49,7 @@ const productItems = [
     },
     {
         label: "Collections",
-        path: "/admin/products/collections",
+        path: "/admin/collections",
     },
     {
         label: "Categories",

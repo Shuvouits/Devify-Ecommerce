@@ -4,10 +4,14 @@ namespace App\Providers;
 
 use App\Repositories\Admin\CategoryRepository;
 use App\Repositories\Admin\CategoryRepositoryInterface;
+use App\Repositories\Admin\CollectionRepository;
+use App\Repositories\Admin\CollectionRepositoryInterface;
 use App\Repositories\Admin\GlobalVariantRepository;
 use App\Repositories\Admin\GlobalVariantRepositoryInterface;
 use App\Repositories\Admin\LocationRepository;
 use App\Repositories\Admin\LocationRepositoryInterface;
+use App\Repositories\Admin\ProductRepository;
+use App\Repositories\Admin\ProductRepositoryInterface;
 use App\Repositories\Ai\AiSettingRepository;
 use App\Repositories\Ai\AiSettingRepositoryInterface;
 use App\Repositories\Auth\AuthRepository;
@@ -89,6 +93,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             GlobalVariantRepositoryInterface::class,
             GlobalVariantRepository::class
+        );
+
+        $this->app->bind(
+            CollectionRepositoryInterface::class,
+            CollectionRepository::class
+        );
+
+        $this->app->bind(
+            ProductRepositoryInterface::class,
+            ProductRepository::class
         );
     }
 

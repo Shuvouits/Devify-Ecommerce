@@ -35,11 +35,14 @@ const CANVAS_HEIGHT = 520;
 
 
 export default function BrandImageStudio({
-    open,
+     open,
     file,
     previewUrl,
     onClose,
     onSave,
+    entityLabel = "brand",
+    mediaLabel = "Logo",
+    defaultFileName = "brand-image.png",
 }) {
     const canvasRef = useRef(null);
 
@@ -969,10 +972,10 @@ export default function BrandImageStudio({
                     return;
                 }
 
-                const originalName =
-                    workingFile?.name ||
-                    file?.name ||
-                    "brand-logo.png";
+              const originalName =
+    workingFile?.name ||
+    file?.name ||
+    defaultFileName;
 
                 const baseName =
                     originalName.replace(
@@ -1029,8 +1032,8 @@ export default function BrandImageStudio({
                 link.href =
                     url;
 
-                link.download =
-                    "brand-image.png";
+               link.download =
+    defaultFileName;
 
                 document.body.appendChild(
                     link
@@ -1081,17 +1084,22 @@ export default function BrandImageStudio({
                         ←
                     </button>
 
-                    <span className="text-[#565f69]">
-                        Edit brand
-                    </span>
+                   
+                   <span className="text-[#565f69]">
+    Edit {entityLabel}
+</span>
+
 
                     <span className="text-[#9ba1a9]">
                         /
                     </span>
 
-                    <span className="text-[#565f69]">
-                        Logo
-                    </span>
+                   
+                   <span className="text-[#565f69]">
+    {mediaLabel}
+</span>
+
+
 
                     <span className="text-[#9ba1a9]">
                         /

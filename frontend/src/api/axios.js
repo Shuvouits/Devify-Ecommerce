@@ -1,5 +1,6 @@
 import axios from "axios";
 
+
 /*
 |--------------------------------------------------------------------------
 | API BASE URL
@@ -22,7 +23,6 @@ const api = axios.create({
 
     headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
     },
 });
 
@@ -38,10 +38,18 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token");
+        const token =
+            localStorage.getItem("token");
 
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization =
+                `Bearer ${token}`;
+        }
+
+        if (
+            config.data instanceof FormData
+        ) {
+            delete config.headers["Content-Type"];
         }
 
         return config;
@@ -61,49 +69,69 @@ api.interceptors.request.use(
 
 let refreshPromise = null;
 
-const refreshAccessToken = async () => {
-    const token = localStorage.getItem("token");
+const refreshAccessToken =
+    async () => {
+        const token =
+            localStorage.getItem(
+                "token"
+            );
 
-    if (!token) {
-        throw new Error("No authentication token found.");
-    }
+        if (!token) {
+            throw new Error(
+                "No authentication token found."
+            );
+        }
 
-    if (!refreshPromise) {
-        refreshPromise = axios
-            .post(
-                `${API_BASE_URL}/auth/refresh`,
-                {},
-                {
-                    headers: {
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((response) => {
-                const newToken =
-                    response.data?.data?.access_token;
+        if (!refreshPromise) {
+            refreshPromise =
+                axios
+                    .post(
+                        `${API_BASE_URL}/auth/refresh`,
+                        {},
+                        {
+                            headers: {
+                                Accept: "application/json",
+                                Authorization:
+                                    `Bearer ${token}`,
+                            },
+                        }
+                    )
+                    .then(
+                        (
+                            response
+                        ) => {
+                            const newToken =
+                                response
+                                    .data
+                                    ?.data
+                                    ?.access_token;
 
-                if (!newToken) {
-                    throw new Error(
-                        "New access token was not returned."
+                            if (
+                                !newToken
+                            ) {
+                                throw new Error(
+                                    "New access token was not returned."
+                                );
+                            }
+
+                            localStorage.setItem(
+                                "token",
+                                newToken
+                            );
+
+                            return newToken;
+                        }
+                    )
+                    .finally(
+                        () => {
+                            refreshPromise =
+                                null;
+                        }
                     );
-                }
+        }
 
-                localStorage.setItem(
-                    "token",
-                    newToken
-                );
-
-                return newToken;
-            })
-            .finally(() => {
-                refreshPromise = null;
-            });
-    }
-
-    return refreshPromise;
-};
+        return refreshPromise;
+    };
 
 
 /*
@@ -126,7 +154,8 @@ api.interceptors.response.use(
     },
 
     async (error) => {
-        const originalRequest = error.config;
+        const originalRequest =
+            error.config;
 
         const status =
             error.response?.status;
@@ -151,15 +180,21 @@ api.interceptors.response.use(
             ];
 
             const isExcludedRoute =
-                excludedRoutes.some((route) =>
-                    originalRequest.url?.includes(route)
+                excludedRoutes.some(
+                    (route) =>
+                        originalRequest.url?.includes(
+                            route
+                        )
                 );
 
             if (isExcludedRoute) {
-                return Promise.reject(error);
+                return Promise.reject(
+                    error
+                );
             }
 
-            originalRequest._retry = true;
+            originalRequest._retry =
+                true;
 
             try {
                 const newToken =
@@ -168,9 +203,15 @@ api.interceptors.response.use(
                 originalRequest.headers.Authorization =
                     `Bearer ${newToken}`;
 
-                return api(originalRequest);
-            } catch (refreshError) {
-                localStorage.removeItem("token");
+                return api(
+                    originalRequest
+                );
+            } catch (
+                refreshError
+            ) {
+                localStorage.removeItem(
+                    "token"
+                );
 
                 return Promise.reject(
                     refreshError

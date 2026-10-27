@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Admin\BrandController;
 use App\Http\Controllers\Api\Admin\BrandSeoController;
 use App\Http\Controllers\Api\Admin\CategoryAiController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\Admin\CollectionController;
 use App\Http\Controllers\Api\Admin\GlobalVariantController;
 use App\Http\Controllers\Api\Admin\Settings\AiImageModelController;
 use App\Http\Controllers\Api\Admin\Settings\AiSettingController;
@@ -16,6 +17,9 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\TwoFactorController;
 use App\Http\Controllers\Api\Admin\LocationController;
+use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Admin\ProductAiController;
+use App\Http\Controllers\Api\Admin\ProductSeoController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -180,5 +184,48 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
 
         Route::delete('/{id}', [GlobalVariantController::class, 'destroy']);
     });
-    
+});
+
+
+
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+
+    Route::prefix('collections')->group(function () {
+        Route::get('/ordered', [CollectionController::class, 'ordered']);
+
+        Route::get('/', [CollectionController::class, 'index']);
+
+        Route::post('/', [CollectionController::class, 'store']);
+
+        Route::get('/{id}', [CollectionController::class, 'show']);
+
+        Route::put('/{id}', [CollectionController::class, 'update']);
+
+        Route::delete('/{id}', [CollectionController::class, 'destroy']);
+    });
+});
+
+
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+
+    Route::prefix('products')->group(function () {
+        Route::get('/select', [ProductController::class, 'select']);
+        Route::get('/stats', [ProductController::class, 'stats']);
+         Route::post('/upload-image', [ProductController::class, 'uploadImage']);
+
+         Route::delete('/delete-image', [ProductController::class, 'deleteImage']);
+
+        Route::get('/', [ProductController::class, 'index']);
+        Route::post('/', [ProductController::class, 'store']);
+
+        Route::get('/{id}', [ProductController::class, 'show']);
+        Route::put('/{id}', [ProductController::class, 'update']);
+        Route::delete('/{id}', [ProductController::class, 'destroy']);
+
+        Route::post('/ai/description', [ProductAiController::class, 'generateDescription']);
+    Route::post('/ai/seo', [ProductAiController::class, 'generateSeo']);
+    Route::post('/seo/analyze', [ProductSeoController::class, 'analyze']);
+
+
+    });
 });
