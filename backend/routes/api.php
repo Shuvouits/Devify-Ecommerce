@@ -194,13 +194,13 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
         Route::get('/ordered', [CollectionController::class, 'ordered']);
 
         Route::get('/', [CollectionController::class, 'index']);
-
         Route::post('/', [CollectionController::class, 'store']);
 
+        Route::post('/upload-image', [CollectionController::class, 'uploadImage']);
+        Route::delete('/delete-image', [CollectionController::class, 'deleteImage']);
+
         Route::get('/{id}', [CollectionController::class, 'show']);
-
         Route::put('/{id}', [CollectionController::class, 'update']);
-
         Route::delete('/{id}', [CollectionController::class, 'destroy']);
     });
 });
@@ -211,9 +211,9 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
     Route::prefix('products')->group(function () {
         Route::get('/select', [ProductController::class, 'select']);
         Route::get('/stats', [ProductController::class, 'stats']);
-         Route::post('/upload-image', [ProductController::class, 'uploadImage']);
+        Route::post('/upload-image', [ProductController::class, 'uploadImage']);
 
-         Route::delete('/delete-image', [ProductController::class, 'deleteImage']);
+        Route::delete('/delete-image', [ProductController::class, 'deleteImage']);
 
         Route::get('/', [ProductController::class, 'index']);
         Route::post('/', [ProductController::class, 'store']);
@@ -223,9 +223,7 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
         Route::delete('/{id}', [ProductController::class, 'destroy']);
 
         Route::post('/ai/description', [ProductAiController::class, 'generateDescription']);
-    Route::post('/ai/seo', [ProductAiController::class, 'generateSeo']);
-    Route::post('/seo/analyze', [ProductSeoController::class, 'analyze']);
-
-
+        Route::post('/ai/seo', [ProductAiController::class, 'generateSeo']);
+        Route::post('/seo/analyze', [ProductSeoController::class, 'analyze']);
     });
 });

@@ -11,6 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+use App\Http\Requests\Api\Admin\Collection\UploadCollectionImageRequest;
+use App\Http\Requests\Api\Admin\Collection\DeleteCollectionImageRequest;
+
 class CollectionController extends Controller
 {
     public function __construct(
@@ -167,4 +170,45 @@ class CollectionController extends Controller
                 'Collection deleted successfully.',
         ]);
     }
+
+        public function uploadImage(
+        UploadCollectionImageRequest $request
+    ): JsonResponse {
+        $result =
+            $this->collectionService
+                ->uploadCollectionImage(
+                    $request->file('image'),
+                    $request->input('collection_title')
+                );
+
+        return response()->json([
+            'success' => true,
+
+            'message' =>
+                'Collection image uploaded successfully.',
+
+            'data' =>
+                $result,
+        ]);
+    }
+
+
+    public function deleteImage(
+        DeleteCollectionImageRequest $request
+    ): JsonResponse {
+        $this->collectionService
+            ->deleteCollectionImage(
+                $request->validated('path')
+            );
+
+        return response()->json([
+            'success' => true,
+            'message' =>
+                'Collection image deleted successfully.',
+        ]);
+    }
+
+
+
+    
 }

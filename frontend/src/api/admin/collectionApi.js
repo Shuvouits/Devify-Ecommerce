@@ -96,3 +96,59 @@ export const deleteCollection = async (id) => {
 
     return response.data;
 };
+
+
+
+/**
+ * |--------------------------------------------------------------------------
+ * | Upload Collection Image
+ * |--------------------------------------------------------------------------
+ */
+
+export const uploadCollectionImage = async (
+    file,
+    collectionTitle = ""
+) => {
+    const formData = new FormData();
+
+    formData.append(
+        "image",
+        file
+    );
+
+    if (collectionTitle) {
+        formData.append(
+            "collection_title",
+            collectionTitle
+        );
+    }
+
+    const response = await api.post(
+        "/admin/collections/upload-image",
+        formData
+    );
+
+    return response.data;
+};
+
+
+/**
+ * |--------------------------------------------------------------------------
+ * | Delete Collection Image
+ * |--------------------------------------------------------------------------
+ */
+
+export const deleteCollectionImage = async (
+    path
+) => {
+    const response = await api.delete(
+        "/admin/collections/delete-image",
+        {
+            data: {
+                path,
+            },
+        }
+    );
+
+    return response.data;
+};

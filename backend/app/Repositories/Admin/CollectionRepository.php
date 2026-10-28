@@ -233,17 +233,27 @@ class CollectionRepository implements CollectionRepositoryInterface
     |--------------------------------------------------------------------------
     */
 
-    public function findOrFail(
-        int $id
-    ): Collection {
-        return Collection::query()
-            ->with([
-                'creator:id,name,email',
-            ])
-            ->findOrFail(
-                $id
-            );
-    }
+   public function findOrFail(
+    int $id
+): Collection {
+    return Collection::query()
+        ->with([
+            'creator:id,name,email',
+
+            'products' => function ($query) {
+                $query
+                    ->orderByPivot(
+                        'display_order'
+                    );
+            },
+
+            'products.category:id,name,slug',
+            'products.media',
+        ])
+        ->findOrFail(
+            $id
+        );
+}
 
 
     /*
@@ -334,4 +344,31 @@ class CollectionRepository implements CollectionRepositoryInterface
                     'display_position'
                 );
     }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Sync Products
+    |--------------------------------------------------------------------------
+    */
+
+    public function syncProducts(
+        Collection $collection,
+        array $productIds
+    ): void {
+        $syncData = [];
+
+        foreach (
+            array_values($productIds) as $index => $productId
+        ) {
+            $syncData[$productId] = [
+                'display_order' => $index + 1,
+            ];
+        }
+
+        $collection
+            ->products()
+            ->sync($syncData);
+    }
+
+
 }

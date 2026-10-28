@@ -21,24 +21,37 @@ class ProductRepository implements ProductRepositoryInterface
     public function paginate(
         array $filters = []
     ): LengthAwarePaginator {
-        $query = Product::query()
-            ->with([
-                'brand:id,name,slug',
-                'category:id,name,slug',
-                'vendor:id,name,email',
-                'creator:id,name,email',
 
-                'media' => function ($query) {
-                    $query
-                        ->orderByDesc('is_cover')
-                        ->orderBy('display_order')
-                        ->limit(1);
-                },
-            ])
-            ->withCount([
-                'variants',
-                'collections',
-            ]);
+
+    $query = Product::query()
+    ->with([
+        'brand:id,name,slug',
+        'category:id,name,slug',
+        'vendor:id,name,email',
+        'creator:id,name,email',
+
+        'media' => function ($query) {
+            $query
+                ->orderByDesc('is_cover')
+                ->orderBy('display_order')
+                ->limit(1);
+        },
+
+        'variants' => function ($query) {
+            $query
+                ->orderBy('display_order')
+                ->orderBy('id');
+        },
+
+        'variants.inventories.location',
+
+        'inventories.location',
+    ])
+    ->withCount([
+        'variants',
+        'collections',
+    ]);
+    
 
         /*
         |--------------------------------------------------------------------------

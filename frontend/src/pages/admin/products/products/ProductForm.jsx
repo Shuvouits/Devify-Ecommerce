@@ -695,106 +695,155 @@ export default function ProductForm() {
 
 
     /*
+|--------------------------------------------------------------------------
+| Extract API List
+|--------------------------------------------------------------------------
+*/
+
+const extractList = (
+    response
+) => {
+    /*
     |--------------------------------------------------------------------------
-    | Extract API List
+    | Brand API
+    | data.brands.data
     |--------------------------------------------------------------------------
     */
 
-    const extractList = (
-        response
-    ) => {
-        if (
-            Array.isArray(
-                response?.data
-            )
-        ) {
-            return response.data;
-        }
+    if (
+        Array.isArray(
+            response?.data?.brands?.data
+        )
+    ) {
+        return response.data.brands.data;
+    }
 
-        if (
-            Array.isArray(
-                response?.data?.data
-            )
-        ) {
-            return response.data.data;
-        }
-
-        if (
-            Array.isArray(response)
-        ) {
-            return response;
-        }
-
-        return [];
-    };
+    if (
+        Array.isArray(
+            response?.brands?.data
+        )
+    ) {
+        return response.brands.data;
+    }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Load Reference Data
+    | Standard Nested API
+    | data.data
     |--------------------------------------------------------------------------
     */
 
-    const loadReferenceData =
-        async () => {
-            const [
-                brandResponse,
-                categoryResponse,
-                collectionResponse,
-                locationResponse,
-                globalVariantResponse,
-            ] =
-                await Promise.all([
-                    getBrands({
-                        status: "active",
-                        per_page: 100,
-                    }),
+    if (
+        Array.isArray(
+            response?.data?.data
+        )
+    ) {
+        return response.data.data;
+    }
 
-                    getCategories({
-                        status: "active",
-                        per_page: 100,
-                    }),
 
-                    getOrderedCollections(),
+    /*
+    |--------------------------------------------------------------------------
+    | Standard API
+    | data
+    |--------------------------------------------------------------------------
+    */
 
-                    getLocations({
-                        status: "active",
-                        per_page: 100,
-                    }),
+    if (
+        Array.isArray(
+            response?.data
+        )
+    ) {
+        return response.data;
+    }
 
-                    getOrderedGlobalVariants(),
-                ]);
 
-            setBrands(
-                extractList(
-                    brandResponse
-                )
-            );
+    /*
+    |--------------------------------------------------------------------------
+    | Direct Array
+    |--------------------------------------------------------------------------
+    */
 
-            setCategories(
-                extractList(
-                    categoryResponse
-                )
-            );
+    if (
+        Array.isArray(
+            response
+        )
+    ) {
+        return response;
+    }
 
-            setCollections(
-                extractList(
-                    collectionResponse
-                )
-            );
 
-            setLocations(
-                extractList(
-                    locationResponse
-                )
-            );
+    return [];
+};
 
-            setGlobalVariants(
-                extractList(
-                    globalVariantResponse
-                )
-            );
-        };
+
+   /*
+|--------------------------------------------------------------------------
+| Load Reference Data
+|--------------------------------------------------------------------------
+*/
+
+const loadReferenceData =
+    async () => {
+        const [
+            brandResponse,
+            categoryResponse,
+            collectionResponse,
+            locationResponse,
+            globalVariantResponse,
+        ] =
+            await Promise.all([
+                getBrands({
+                    filter: "active",
+                    per_page: 100,
+                }),
+
+                getCategories({
+                    status: "active",
+                    per_page: 100,
+                }),
+
+                getOrderedCollections(),
+
+                getLocations({
+                    status: "active",
+                    per_page: 100,
+                }),
+
+                getOrderedGlobalVariants(),
+            ]);
+
+        setBrands(
+            extractList(
+                brandResponse
+            )
+        );
+
+        setCategories(
+            extractList(
+                categoryResponse
+            )
+        );
+
+        setCollections(
+            extractList(
+                collectionResponse
+            )
+        );
+
+        setLocations(
+            extractList(
+                locationResponse
+            )
+        );
+
+        setGlobalVariants(
+            extractList(
+                globalVariantResponse
+            )
+        );
+    };
 
 
     /*

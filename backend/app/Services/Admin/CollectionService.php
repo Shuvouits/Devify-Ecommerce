@@ -4,14 +4,21 @@ namespace App\Services\Admin;
 
 use App\Models\Collection;
 use App\Repositories\Admin\CollectionRepositoryInterface;
+use App\Traits\HandlesImageUploads;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+use Illuminate\Http\UploadedFile;
+
+
+
 class CollectionService
 {
+
+use HandlesImageUploads;
     public function __construct(
         protected CollectionRepositoryInterface $collectionRepository
     ) {
@@ -87,290 +94,347 @@ class CollectionService
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Create Collection
-    |--------------------------------------------------------------------------
-    */
+   public function createCollection(
+    array $data,
+    ?int $userId = null
+): Collection {
+    return DB::transaction(
+        function () use (
+            $data,
+            $userId
+        ) {
+            $collectionType =
+                $data['collection_type'] ??
+                'manual';
 
-    public function createCollection(
-        array $data,
-        ?int $userId = null
-    ): Collection {
-        return DB::transaction(
-            function () use (
-                $data,
-                $userId
-            ) {
-                $collectionType =
-                    $data['collection_type'] ??
-                    'manual';
+            $this->validateAutomation(
+                $collectionType,
+                $data
+            );
 
-                $this->validateAutomation(
-                    $collectionType,
+            $collection =
+                $this->collectionRepository
+                    ->create([
+                        'title' =>
+                            $data['title'],
+
+                        'slug' =>
+                            $this->generateUniqueSlug(
+                                $data['slug'] ??
+                                $data['title']
+                            ),
+
+                        'description' =>
+                            $data['description'] ??
+                            null,
+
+                        'image_path' =>
+                            $data['image_path'] ??
+                            null,
+
+                        'status' =>
+                            $data['status'] ??
+                            'draft',
+
+                        'publish_online_store' =>
+                            $data['publish_online_store'] ??
+                            true,
+
+                        'publish_point_of_sale' =>
+                            $data['publish_point_of_sale'] ??
+                            false,
+
+                        'kind' =>
+                            $data['kind'] ??
+                            'collection',
+
+                        'collection_type' =>
+                            $collectionType,
+
+                        'automation_match_type' =>
+                            $collectionType === 'automated'
+                                ? (
+                                    $data['automation_match_type'] ??
+                                    'all'
+                                )
+                                : null,
+
+                        'automation_conditions' =>
+                            $collectionType === 'automated'
+                                ? (
+                                    $data['automation_conditions'] ??
+                                    []
+                                )
+                                : null,
+
+                        'sort_order' =>
+                            $data['sort_order'] ??
+                            'manual',
+
+                        'display_position' =>
+                            $data['display_position'] ??
+                            (
+                                $this->collectionRepository
+                                    ->getMaxDisplayPosition() + 1
+                            ),
+
+                        'seo_title' =>
+                            $data['seo_title'] ??
+                            null,
+
+                        'seo_description' =>
+                            $data['seo_description'] ??
+                            null,
+
+                        'created_by' =>
+                            $userId,
+                    ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Products
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $collectionType === 'manual' &&
+                array_key_exists(
+                    'product_ids',
                     $data
-                );
+                )
+            ) {
+                $this->collectionRepository
+                    ->syncProducts(
+                        $collection,
+                        $data['product_ids'] ?? []
+                    );
+            }
 
+            return $collection->fresh([
+                'creator:id,name,email',
+                'products',
+            ]);
+        }
+    );
+}
+
+   public function updateCollection(
+    int $id,
+    array $data
+): Collection {
+    return DB::transaction(
+        function () use (
+            $id,
+            $data
+        ) {
+            $collection =
+                $this->getCollection($id);
+
+            $collectionType =
+                $data['collection_type'] ??
+                $collection->collection_type;
+
+            $this->validateAutomation(
+                $collectionType,
+                $data,
+                $collection
+            );
+
+            $payload = [];
+
+            /*
+            |--------------------------------------------------------------------------
+            | Title
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                array_key_exists(
+                    'title',
+                    $data
+                )
+            ) {
+                $payload['title'] =
+                    $data['title'];
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Slug
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                array_key_exists(
+                    'slug',
+                    $data
+                )
+            ) {
+                $slugSource =
+                    trim(
+                        (string)
+                        $data['slug']
+                    );
+
+                if ($slugSource === '') {
+                    $slugSource =
+                        $data['title'] ??
+                        $collection->title;
+                }
+
+                $payload['slug'] =
+                    $this->generateUniqueSlug(
+                        $slugSource,
+                        $collection->id
+                    );
+            } elseif (
+                array_key_exists(
+                    'title',
+                    $data
+                ) &&
+                $data['title'] !==
+                $collection->title
+            ) {
+                $payload['slug'] =
+                    $this->generateUniqueSlug(
+                        $data['title'],
+                        $collection->id
+                    );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Standard Fields
+            |--------------------------------------------------------------------------
+            */
+
+            $simpleFields = [
+                'description',
+                'image_path',
+                'status',
+                'publish_online_store',
+                'publish_point_of_sale',
+                'kind',
+                'sort_order',
+                'display_position',
+                'seo_title',
+                'seo_description',
+            ];
+
+            foreach (
+                $simpleFields as $field
+            ) {
+                if (
+                    array_key_exists(
+                        $field,
+                        $data
+                    )
+                ) {
+                    $payload[$field] =
+                        $data[$field];
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Collection Type
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                array_key_exists(
+                    'collection_type',
+                    $data
+                )
+            ) {
+                $payload['collection_type'] =
+                    $collectionType;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Automation
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $collectionType ===
+                'automated'
+            ) {
+                $payload['automation_match_type'] =
+                    $data['automation_match_type'] ??
+                    $collection->automation_match_type ??
+                    'all';
+
+                if (
+                    array_key_exists(
+                        'automation_conditions',
+                        $data
+                    )
+                ) {
+                    $payload['automation_conditions'] =
+                        $data['automation_conditions'];
+                }
+            } else {
+                $payload['automation_match_type'] =
+                    null;
+
+                $payload['automation_conditions'] =
+                    null;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Collection
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($payload)) {
                 $collection =
                     $this->collectionRepository
-                        ->create([
-                            'title' =>
-                                $data['title'],
-
-                            'slug' =>
-                                $this->generateUniqueSlug(
-                                    $data['slug'] ??
-                                    $data['title']
-                                ),
-
-                            'description' =>
-                                $data['description'] ??
-                                null,
-
-                            'image_path' =>
-                                $data['image_path'] ??
-                                null,
-
-                            'status' =>
-                                $data['status'] ??
-                                'draft',
-
-                            'publish_online_store' =>
-                                $data['publish_online_store'] ??
-                                true,
-
-                            'publish_point_of_sale' =>
-                                $data['publish_point_of_sale'] ??
-                                false,
-
-                            'kind' =>
-                                $data['kind'] ??
-                                'collection',
-
-                            'collection_type' =>
-                                $collectionType,
-
-                            'automation_match_type' =>
-                                $collectionType === 'automated'
-                                    ? (
-                                        $data['automation_match_type'] ??
-                                        'all'
-                                    )
-                                    : null,
-
-                            'automation_conditions' =>
-                                $collectionType === 'automated'
-                                    ? (
-                                        $data['automation_conditions'] ??
-                                        []
-                                    )
-                                    : null,
-
-                            'sort_order' =>
-                                $data['sort_order'] ??
-                                'manual',
-
-                            'display_position' =>
-                                $data['display_position'] ??
-                                (
-                                    $this->collectionRepository
-                                        ->getMaxDisplayPosition() + 1
-                                ),
-
-                            'seo_title' =>
-                                $data['seo_title'] ??
-                                null,
-
-                            'seo_description' =>
-                                $data['seo_description'] ??
-                                null,
-
-                            'created_by' =>
-                                $userId,
-                        ]);
-
-                return $collection->fresh([
-                    'creator:id,name,email',
-                ]);
+                        ->update(
+                            $collection,
+                            $payload
+                        );
             }
-        );
-    }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Products
+            |--------------------------------------------------------------------------
+            */
 
-    /*
-    |--------------------------------------------------------------------------
-    | Update Collection
-    |--------------------------------------------------------------------------
-    */
-
-    public function updateCollection(
-        int $id,
-        array $data
-    ): Collection {
-        return DB::transaction(
-            function () use (
-                $id,
-                $data
+            if (
+                $collectionType ===
+                'manual'
             ) {
-                $collection =
-                    $this->getCollection($id);
-
-                $collectionType =
-                    $data['collection_type'] ??
-                    $collection->collection_type;
-
-                $this->validateAutomation(
-                    $collectionType,
-                    $data,
-                    $collection
-                );
-
-                $payload = [];
-
-                /*
-                |--------------------------------------------------------------------------
-                | Title
-                |--------------------------------------------------------------------------
-                */
-
                 if (
                     array_key_exists(
-                        'title',
+                        'product_ids',
                         $data
                     )
                 ) {
-                    $payload['title'] =
-                        $data['title'];
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Slug
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    array_key_exists(
-                        'slug',
-                        $data
-                    )
-                ) {
-                    $payload['slug'] =
-                        $this->generateUniqueSlug(
-                            $data['slug'],
-                            $collection->id
-                        );
-                } elseif (
-                    array_key_exists(
-                        'title',
-                        $data
-                    ) &&
-                    $data['title'] !==
-                    $collection->title
-                ) {
-                    $payload['slug'] =
-                        $this->generateUniqueSlug(
-                            $data['title'],
-                            $collection->id
+                    $this->collectionRepository
+                        ->syncProducts(
+                            $collection,
+                            $data['product_ids'] ?? []
                         );
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Standard Fields
-                |--------------------------------------------------------------------------
-                */
-
-                $simpleFields = [
-                    'description',
-                    'image_path',
-                    'status',
-                    'publish_online_store',
-                    'publish_point_of_sale',
-                    'kind',
-                    'sort_order',
-                    'display_position',
-                    'seo_title',
-                    'seo_description',
-                ];
-
-                foreach (
-                    $simpleFields as $field
-                ) {
-                    if (
-                        array_key_exists(
-                            $field,
-                            $data
-                        )
-                    ) {
-                        $payload[$field] =
-                            $data[$field];
-                    }
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Collection Type
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    array_key_exists(
-                        'collection_type',
-                        $data
-                    )
-                ) {
-                    $payload['collection_type'] =
-                        $collectionType;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Automation
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    $collectionType ===
-                    'automated'
-                ) {
-                    $payload['automation_match_type'] =
-                        $data['automation_match_type'] ??
-                        $collection->automation_match_type ??
-                        'all';
-
-                    if (
-                        array_key_exists(
-                            'automation_conditions',
-                            $data
-                        )
-                    ) {
-                        $payload['automation_conditions'] =
-                            $data['automation_conditions'];
-                    }
-                } else {
-                    $payload['automation_match_type'] =
-                        null;
-
-                    $payload['automation_conditions'] =
-                        null;
-                }
-
-                if (!empty($payload)) {
-                    $collection =
-                        $this->collectionRepository
-                            ->update(
-                                $collection,
-                                $payload
-                            );
-                }
-
-                return $collection->fresh([
-                    'creator:id,name,email',
-                ]);
+            } else {
+                $this->collectionRepository
+                    ->syncProducts(
+                        $collection,
+                        []
+                    );
             }
-        );
-    }
+
+            return $collection->fresh([
+                'creator:id,name,email',
+                'products',
+            ]);
+        }
+    );
+}
 
 
     /*
@@ -388,6 +452,75 @@ class CollectionService
         return $this->collectionRepository
             ->delete($collection);
     }
+
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Upload Collection Image
+    |--------------------------------------------------------------------------
+    */
+
+    public function uploadCollectionImage(
+        UploadedFile $image,
+        ?string $collectionTitle = null
+    ): array {
+        $path =
+            $this->uploadImage(
+                $image,
+                'uploads/collections',
+                null,
+                $collectionTitle ??
+                'collection'
+            );
+
+        return [
+            'file_path' =>
+                $path,
+
+            'url' =>
+                $this->getImageUrl(
+                    $path
+                ),
+        ];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Collection Image
+    |--------------------------------------------------------------------------
+    */
+
+    public function deleteCollectionImage(
+        string $path
+    ): void {
+        $normalizedPath =
+            ltrim(
+                trim($path),
+                '/'
+            );
+
+        if (
+            !str_starts_with(
+                $normalizedPath,
+                'uploads/collections/'
+            )
+        ) {
+            throw ValidationException::withMessages([
+                'path' => [
+                    'Invalid collection image path.',
+                ],
+            ]);
+        }
+
+        $this->deleteImage(
+            $normalizedPath
+        );
+    }
+
+
+
 
 
     /*

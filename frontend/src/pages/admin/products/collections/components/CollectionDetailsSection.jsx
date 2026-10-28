@@ -2,7 +2,18 @@ import {
     Image as ImageIcon,
     Sparkles,
     Upload,
+    Loader2,
 } from "lucide-react";
+
+import {
+    useRef,
+    useState,
+} from "react";
+
+import {
+    uploadCollectionImage,
+    deleteCollectionImage,
+} from "../../../../../api/admin/collectionApi";
 
 
 export default function CollectionDetailsSection({
@@ -10,6 +21,24 @@ export default function CollectionDetailsSection({
     onChange,
     fieldErrors = {},
 }) {
+    const fileInputRef = useRef(null);
+
+    const [
+        uploading,
+        setUploading,
+    ] = useState(false);
+
+    const [
+        deleting,
+        setDeleting,
+    ] = useState(false);
+
+    const [
+        imageError,
+        setImageError,
+    ] = useState("");
+
+
     const imageUrl =
         form.image_path
             ? form.image_path.startsWith(
@@ -23,6 +52,111 @@ export default function CollectionDetailsSection({
             : null;
 
 
+    const handleUploadClick = () => {
+        if (uploading) {
+            return;
+        }
+
+        fileInputRef.current?.click();
+    };
+
+
+    const handleImageChange = async (
+        event
+    ) => {
+        const file =
+            event.target.files?.[0];
+
+        event.target.value = "";
+
+        if (!file) {
+            return;
+        }
+
+        setImageError("");
+        setUploading(true);
+
+        try {
+            const response =
+                await uploadCollectionImage(
+                    file,
+                    form.title
+                );
+
+            const filePath =
+                response?.data?.file_path;
+
+            if (!filePath) {
+                throw new Error(
+                    "Uploaded image path was not returned."
+                );
+            }
+
+            onChange(
+                "image_path",
+                filePath
+            );
+        } catch (error) {
+            const message =
+                error?.response?.data
+                    ?.errors?.image?.[0] ||
+                error?.response?.data
+                    ?.message ||
+                error?.message ||
+                "Unable to upload collection image.";
+
+            setImageError(message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+
+    const handleRemoveImage = async () => {
+        if (
+            !form.image_path ||
+            deleting
+        ) {
+            return;
+        }
+
+        setImageError("");
+        setDeleting(true);
+
+        try {
+            if (
+                !form.image_path.startsWith(
+                    "http://"
+                ) &&
+                !form.image_path.startsWith(
+                    "https://"
+                )
+            ) {
+                await deleteCollectionImage(
+                    form.image_path
+                );
+            }
+
+            onChange(
+                "image_path",
+                ""
+            );
+        } catch (error) {
+            const message =
+                error?.response?.data
+                    ?.errors?.path?.[0] ||
+                error?.response?.data
+                    ?.message ||
+                error?.message ||
+                "Unable to remove collection image.";
+
+            setImageError(message);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+
     return (
         <section className="overflow-hidden rounded-[18px] border border-[#e2e4e8] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
             <div className="p-[22px]">
@@ -31,11 +165,10 @@ export default function CollectionDetailsSection({
                 </h2>
 
 
-                {/* Title */}
-
                 <div className="mt-[14px]">
                     <label className="mb-[6px] block text-[11px] font-medium text-[#202833]">
                         Title
+
                         <span className="ml-[2px] text-red-500">
                             *
                         </span>
@@ -43,14 +176,11 @@ export default function CollectionDetailsSection({
 
                     <input
                         type="text"
-                        value={
-                            form.title
-                        }
+                        value={form.title}
                         onChange={(event) =>
                             onChange(
                                 "title",
-                                event.target
-                                    .value
+                                event.target.value
                             )
                         }
                         placeholder="Summer Collection"
@@ -66,13 +196,10 @@ export default function CollectionDetailsSection({
                             "outline-none",
                             "transition",
                             "placeholder:text-[#929aa4]",
-                            fieldErrors
-                                ?.title
+                            fieldErrors?.title
                                 ? "border-red-300 focus:border-red-400"
                                 : "border-[#ccd3dc] focus:border-[#7da0f8] focus:ring-2 focus:ring-[#eef3ff]",
-                        ].join(
-                            " "
-                        )}
+                        ].join(" ")}
                     />
 
                     {fieldErrors
@@ -86,8 +213,6 @@ export default function CollectionDetailsSection({
                     )}
                 </div>
 
-
-                {/* Description */}
 
                 <div className="mt-[14px]">
                     <div className="mb-[6px] flex items-center justify-between">
@@ -115,8 +240,7 @@ export default function CollectionDetailsSection({
                         onChange={(event) =>
                             onChange(
                                 "description",
-                                event.target
-                                    .value
+                                event.target.value
                             )
                         }
                         placeholder="Describe this collection..."
@@ -124,8 +248,6 @@ export default function CollectionDetailsSection({
                     />
                 </div>
 
-
-                {/* Collection Image */}
 
                 <div className="mt-[16px]">
                     <div className="mb-[7px] flex items-center justify-between">
@@ -152,6 +274,18 @@ export default function CollectionDetailsSection({
                         </button>
                     </div>
 
+
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        onChange={
+                            handleImageChange
+                        }
+                        className="hidden"
+                    />
+
+
                     <div className="rounded-[13px] border border-dashed border-[#d5dae1] bg-[#fcfcfd] p-[12px]">
                         {imageUrl ? (
                             <div className="overflow-hidden rounded-[10px] border border-[#e0e3e7] bg-white">
@@ -175,15 +309,24 @@ export default function CollectionDetailsSection({
 
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            onChange(
-                                                "image_path",
-                                                ""
-                                            )
+                                        onClick={
+                                            handleRemoveImage
                                         }
-                                        className="text-[9.5px] font-medium text-red-600 hover:underline"
+                                        disabled={
+                                            deleting
+                                        }
+                                        className="inline-flex items-center gap-[5px] text-[9.5px] font-medium text-red-600 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                        Remove
+                                        {deleting && (
+                                            <Loader2
+                                                size={11}
+                                                className="animate-spin"
+                                            />
+                                        )}
+
+                                        {deleting
+                                            ? "Removing..."
+                                            : "Remove"}
                                     </button>
                                 </div>
                             </div>
@@ -207,13 +350,28 @@ export default function CollectionDetailsSection({
                                 <div className="mt-[10px] flex items-center gap-[7px]">
                                     <button
                                         type="button"
-                                        className="inline-flex h-[31px] items-center gap-[5px] rounded-[8px] border border-[#d9dee4] bg-white px-[10px] text-[9.5px] font-medium text-[#4f5965] transition hover:bg-[#f7f8fa]"
+                                        onClick={
+                                            handleUploadClick
+                                        }
+                                        disabled={
+                                            uploading
+                                        }
+                                        className="inline-flex h-[31px] items-center gap-[5px] rounded-[8px] border border-[#d9dee4] bg-white px-[10px] text-[9.5px] font-medium text-[#4f5965] transition hover:bg-[#f7f8fa] disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                        <Upload
-                                            size={12}
-                                        />
+                                        {uploading ? (
+                                            <Loader2
+                                                size={12}
+                                                className="animate-spin"
+                                            />
+                                        ) : (
+                                            <Upload
+                                                size={12}
+                                            />
+                                        )}
 
-                                        Upload
+                                        {uploading
+                                            ? "Uploading..."
+                                            : "Upload"}
                                     </button>
 
                                     <button
@@ -230,6 +388,22 @@ export default function CollectionDetailsSection({
                             </div>
                         )}
                     </div>
+
+                    {imageError && (
+                        <p className="mt-[6px] text-[9.5px] text-red-600">
+                            {imageError}
+                        </p>
+                    )}
+
+                    {fieldErrors
+                        ?.image_path?.[0] && (
+                        <p className="mt-[6px] text-[9.5px] text-red-600">
+                            {
+                                fieldErrors
+                                    .image_path[0]
+                            }
+                        </p>
+                    )}
                 </div>
             </div>
         </section>

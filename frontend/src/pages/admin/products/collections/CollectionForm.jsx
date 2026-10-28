@@ -45,6 +45,9 @@ const initialForm = {
     automation_match_type: "all",
     automation_conditions: [],
 
+    selected_products: [],
+    product_ids: [],
+
     sort_order: "manual",
     display_position: 0,
 
@@ -120,6 +123,13 @@ export default function CollectionForm() {
                         response?.data ||
                         response;
 
+                    const products =
+                        Array.isArray(
+                            collection?.products
+                        )
+                            ? collection.products
+                            : [];
+
                     setForm({
                         title:
                             collection?.title ||
@@ -175,6 +185,15 @@ export default function CollectionForm() {
                                 ? collection
                                       .automation_conditions
                                 : [],
+
+                        selected_products:
+                            products,
+
+                        product_ids:
+                            products.map(
+                                (product) =>
+                                    product.id
+                            ),
 
                         sort_order:
                             collection
@@ -269,6 +288,26 @@ export default function CollectionForm() {
 
     const buildPayload =
         () => {
+            const productIds =
+                Array.isArray(
+                    form.product_ids
+                )
+                    ? form.product_ids
+                          .map(
+                              (productId) =>
+                                  Number(
+                                      productId
+                                  )
+                          )
+                          .filter(
+                              (productId) =>
+                                  Number.isInteger(
+                                      productId
+                                  ) &&
+                                  productId > 0
+                          )
+                    : [];
+
             const payload = {
                 title:
                     form.title.trim(),
@@ -303,6 +342,12 @@ export default function CollectionForm() {
 
                 collection_type:
                     form.collection_type,
+
+                product_ids:
+                    form.collection_type ===
+                    "manual"
+                        ? productIds
+                        : [],
 
                 sort_order:
                     form.sort_order,
