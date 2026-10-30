@@ -8,6 +8,10 @@ use App\Repositories\Admin\CollectionRepository;
 use App\Repositories\Admin\CollectionRepositoryInterface;
 use App\Repositories\Admin\GlobalVariantRepository;
 use App\Repositories\Admin\GlobalVariantRepositoryInterface;
+use App\Repositories\Admin\HomepageSectionRepository;
+use App\Repositories\Admin\HomepageSectionRepositoryInterface;
+use App\Repositories\Admin\HomepageSliderRepository;
+use App\Repositories\Admin\HomepageSliderRepositoryInterface;
 use App\Repositories\Admin\LocationRepository;
 use App\Repositories\Admin\LocationRepositoryInterface;
 use App\Repositories\Admin\ProductRepository;
@@ -32,6 +36,9 @@ use App\Services\Mail\DynamicMailConfigService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\ServiceProvider;
+
+use App\Repositories\Storefront\HomepageSliderRepository as StorefrontHomepageSliderRepository;
+use App\Repositories\Storefront\HomepageSliderRepositoryInterface as StorefrontHomepageSliderRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -103,6 +110,21 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             ProductRepositoryInterface::class,
             ProductRepository::class
+        );
+
+        $this->app->bind(
+            HomepageSliderRepositoryInterface::class,
+            HomepageSliderRepository::class
+        );
+
+        $this->app->bind(
+            StorefrontHomepageSliderRepositoryInterface::class,
+            StorefrontHomepageSliderRepository::class
+        );
+
+        $this->app->bind(
+            HomepageSectionRepositoryInterface::class,
+            HomepageSectionRepository::class
         );
     }
 

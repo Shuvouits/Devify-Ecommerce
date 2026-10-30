@@ -1,16 +1,26 @@
+import HomepageSlider from "../../components/frontend/home/HomepageSlider";
+import FeaturedCategories from "../../components/frontend/home/FeaturedCategories";
+
 const Home = () => {
     return (
-        <div className="min-h-[550px] bg-white">
-            <div className="mx-auto max-w-[1300px] px-4 py-16 xl:px-0">
-                <h1 className="text-3xl font-bold text-[#252b35]">
-                    Storify Ecommerce
-                </h1>
+        <main className="mx-auto min-h-screen w-full max-w-[1300px] bg-white">
 
-                <p className="mt-3 text-gray-500">
-                    Homepage sections will be added here.
-                </p>
-            </div>
-        </div>
+            {/* Section 1: Homepage Hero Slider */}
+            <HomepageSlider />
+
+            {/* Section 2: Featured Categories */}
+            <FeaturedCategories />
+
+            {/* Section 3: Products on Sale */}
+            {/* <ProductsOnSale /> */}
+
+            {/* Section 4: Featured Products */}
+            {/* <FeaturedProducts /> */}
+
+            {/* Section 5: New Arrivals */}
+            {/* <NewArrivals /> */}
+
+        </main>
     );
 };
 

@@ -35,7 +35,7 @@ const CANVAS_HEIGHT = 520;
 
 
 export default function BrandImageStudio({
-     open,
+    open,
     file,
     previewUrl,
     onClose,
@@ -305,7 +305,7 @@ export default function BrandImageStudio({
 
         const source =
             backgroundRemoved &&
-            transparentImageCanvasRef.current
+                transparentImageCanvasRef.current
                 ? transparentImageCanvasRef.current
                 : image;
 
@@ -392,10 +392,10 @@ export default function BrandImageStudio({
                     Math.min(
                         1,
                         maxDimension /
-                            Math.max(
-                                naturalWidth,
-                                naturalHeight
-                            )
+                        Math.max(
+                            naturalWidth,
+                            naturalHeight
+                        )
                     );
 
                 const width =
@@ -403,7 +403,7 @@ export default function BrandImageStudio({
                         1,
                         Math.round(
                             naturalWidth *
-                                processingScale
+                            processingScale
                         )
                     );
 
@@ -412,7 +412,7 @@ export default function BrandImageStudio({
                         1,
                         Math.round(
                             naturalHeight *
-                                processingScale
+                            processingScale
                         )
                     );
 
@@ -568,7 +568,7 @@ export default function BrandImageStudio({
                     const pixelIndex =
                         (
                             y *
-                                width +
+                            width +
                             x
                         ) *
                         4;
@@ -600,12 +600,12 @@ export default function BrandImageStudio({
 
                     const pixel =
                         y *
-                            width +
+                        width +
                         x;
 
                     if (
                         visited[
-                            pixel
+                        pixel
                         ]
                     ) {
                         return;
@@ -617,8 +617,8 @@ export default function BrandImageStudio({
 
                     const alpha =
                         data[
-                            dataIndex +
-                                3
+                        dataIndex +
+                        3
                         ];
 
                     /*
@@ -713,7 +713,7 @@ export default function BrandImageStudio({
                 ) {
                     const pixel =
                         queue[
-                            queueStart
+                        queueStart
                         ];
 
                     queueStart++;
@@ -726,7 +726,7 @@ export default function BrandImageStudio({
                     const y =
                         Math.floor(
                             pixel /
-                                width
+                            width
                         );
 
                     const dataIndex =
@@ -735,8 +735,8 @@ export default function BrandImageStudio({
 
                     const originalAlpha =
                         data[
-                            dataIndex +
-                                3
+                        dataIndex +
+                        3
                         ];
 
                     const distance =
@@ -752,7 +752,7 @@ export default function BrandImageStudio({
                     ) {
                         data[
                             dataIndex +
-                                3
+                            3
                         ] = 0;
                     } else if (
                         distance <=
@@ -763,7 +763,7 @@ export default function BrandImageStudio({
                          */
                         data[
                             dataIndex +
-                                3
+                            3
                         ] = 0;
                     } else {
                         /*
@@ -793,11 +793,11 @@ export default function BrandImageStudio({
 
                         data[
                             dataIndex +
-                                3
+                            3
                         ] =
                             Math.round(
                                 originalAlpha *
-                                    safeProgress
+                                safeProgress
                             );
                     }
 
@@ -972,10 +972,10 @@ export default function BrandImageStudio({
                     return;
                 }
 
-              const originalName =
-    workingFile?.name ||
-    file?.name ||
-    defaultFileName;
+                const originalName =
+                    workingFile?.name ||
+                    file?.name ||
+                    defaultFileName;
 
                 const baseName =
                     originalName.replace(
@@ -1032,8 +1032,8 @@ export default function BrandImageStudio({
                 link.href =
                     url;
 
-               link.download =
-    defaultFileName;
+                link.download =
+                    defaultFileName;
 
                 document.body.appendChild(
                     link
@@ -1084,20 +1084,20 @@ export default function BrandImageStudio({
                         ←
                     </button>
 
-                   
-                   <span className="text-[#565f69]">
-    Edit {entityLabel}
-</span>
+
+                    <span className="text-[#565f69]">
+                        Edit {entityLabel}
+                    </span>
 
 
                     <span className="text-[#9ba1a9]">
                         /
                     </span>
 
-                   
-                   <span className="text-[#565f69]">
-    {mediaLabel}
-</span>
+
+                    <span className="text-[#565f69]">
+                        {mediaLabel}
+                    </span>
 
 
 
@@ -1203,7 +1203,7 @@ export default function BrandImageStudio({
                                                     Math.max(
                                                         25,
                                                         current -
-                                                            10
+                                                        10
                                                     )
                                             )
                                         }
@@ -1230,7 +1230,7 @@ export default function BrandImageStudio({
                                                     Math.min(
                                                         200,
                                                         current +
-                                                            10
+                                                        10
                                                     )
                                             )
                                         }
@@ -1446,7 +1446,7 @@ export default function BrandImageStudio({
                                 "relative",
                                 "text-[11px]",
                                 tab ===
-                                "quick"
+                                    "quick"
                                     ? "font-medium text-[#316ff4]"
                                     : "text-[#555e69]",
                             ].join(" ")}
@@ -1454,9 +1454,9 @@ export default function BrandImageStudio({
                             Quick Prompt
 
                             {tab ===
-                            "quick" && (
-                                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#316ff4]" />
-                            )}
+                                "quick" && (
+                                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#316ff4]" />
+                                )}
                         </button>
 
 
@@ -1471,7 +1471,7 @@ export default function BrandImageStudio({
                                 "relative",
                                 "text-[11px]",
                                 tab ===
-                                "effects"
+                                    "effects"
                                     ? "font-medium text-[#316ff4]"
                                     : "text-[#555e69]",
                             ].join(" ")}
@@ -1479,9 +1479,9 @@ export default function BrandImageStudio({
                             Effects
 
                             {tab ===
-                            "effects" && (
-                                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#316ff4]" />
-                            )}
+                                "effects" && (
+                                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#316ff4]" />
+                                )}
                         </button>
 
                     </div>
@@ -1490,7 +1490,7 @@ export default function BrandImageStudio({
                     <div className="min-h-0 flex-1">
 
                         {tab ===
-                        "quick" ? (
+                            "quick" ? (
                             <ImageStudioQuickPrompt
                                 background={
                                     background
@@ -1655,9 +1655,9 @@ function drawSourceImage({
     const fitScale =
         Math.min(
             availableWidth /
-                sourceWidth,
+            sourceWidth,
             availableHeight /
-                sourceHeight,
+            sourceHeight,
             1
         );
 
@@ -1790,7 +1790,7 @@ function drawBackground(
                 0,
                 width,
                 height *
-                    0.72
+                0.72
             );
 
         wall.addColorStop(
@@ -1811,7 +1811,7 @@ function drawBackground(
             0,
             width,
             height *
-                0.72
+            0.72
         );
 
 
@@ -1819,7 +1819,7 @@ function drawBackground(
             context.createLinearGradient(
                 0,
                 height *
-                    0.72,
+                0.72,
                 0,
                 height
             );
@@ -1840,26 +1840,26 @@ function drawBackground(
         context.fillRect(
             0,
             height *
-                0.72,
+            0.72,
             width,
             height *
-                0.28
+            0.28
         );
 
 
         const light =
             context.createRadialGradient(
                 width *
-                    0.25,
+                0.25,
                 height *
-                    0.18,
+                0.18,
                 10,
                 width *
-                    0.25,
+                0.25,
                 height *
-                    0.18,
+                0.18,
                 width *
-                    0.48
+                0.48
             );
 
         light.addColorStop(
@@ -1927,10 +1927,10 @@ function drawBackground(
         context.fillRect(
             0,
             height *
-                0.73,
+            0.73,
             width,
             height *
-                0.27
+            0.27
         );
 
 
@@ -1939,13 +1939,13 @@ function drawBackground(
 
         context.fillRect(
             width *
-                0.08,
+            0.08,
             height *
-                0.12,
+            0.12,
             width *
-                0.25,
+            0.25,
             height *
-                0.38
+            0.38
         );
 
         context.restore();
@@ -1995,16 +1995,16 @@ function drawBackground(
         const glow =
             context.createRadialGradient(
                 width *
-                    0.65,
+                0.65,
                 height *
-                    0.4,
+                0.4,
                 20,
                 width *
-                    0.65,
+                0.65,
                 height *
-                    0.4,
+                0.4,
                 width *
-                    0.5
+                0.5
             );
 
         glow.addColorStop(
@@ -2074,16 +2074,16 @@ function drawBackground(
         const cyanGlow =
             context.createRadialGradient(
                 width *
-                    0.25,
+                0.25,
                 height *
-                    0.35,
+                0.35,
                 10,
                 width *
-                    0.25,
+                0.25,
                 height *
-                    0.35,
+                0.35,
                 width *
-                    0.35
+                0.35
             );
 
         cyanGlow.addColorStop(
@@ -2110,16 +2110,16 @@ function drawBackground(
         const pinkGlow =
             context.createRadialGradient(
                 width *
-                    0.75,
+                0.75,
                 height *
-                    0.55,
+                0.55,
                 10,
                 width *
-                    0.75,
+                0.75,
                 height *
-                    0.55,
+                0.55,
                 width *
-                    0.35
+                0.35
             );
 
         pinkGlow.addColorStop(
@@ -2227,7 +2227,7 @@ function applyPixelEffects(
     ) {
         if (
             data[
-                index + 3
+            index + 3
             ] === 0
         ) {
             continue;
@@ -2239,12 +2239,12 @@ function applyPixelEffects(
 
         let green =
             data[
-                index + 1
+            index + 1
             ];
 
         let blue =
             data[
-                index + 2
+            index + 2
             ];
 
 
@@ -2266,7 +2266,7 @@ function applyPixelEffects(
             Math.pow(
                 2,
                 effects.exposure /
-                    100
+                100
             );
 
         red *=
@@ -2281,36 +2281,36 @@ function applyPixelEffects(
 
         red =
             contrastFactor *
-                (
-                    red -
-                    128
-                ) +
+            (
+                red -
+                128
+            ) +
             128;
 
         green =
             contrastFactor *
-                (
-                    green -
-                    128
-                ) +
+            (
+                green -
+                128
+            ) +
             128;
 
         blue =
             contrastFactor *
-                (
-                    blue -
-                    128
-                ) +
+            (
+                blue -
+                128
+            ) +
             128;
 
 
         const luminance =
             0.299 *
-                red +
+            red +
             0.587 *
-                green +
+            green +
             0.114 *
-                blue;
+            blue;
 
 
         if (
@@ -2322,7 +2322,7 @@ function applyPixelEffects(
                     Math.max(
                         0,
                         luminance /
-                            255
+                        255
                     ),
                     2
                 );
@@ -2352,8 +2352,8 @@ function applyPixelEffects(
                     Math.max(
                         0,
                         1 -
-                            luminance /
-                                255
+                        luminance /
+                        255
                     ),
                     2
                 );
@@ -2376,17 +2376,17 @@ function applyPixelEffects(
 
         const gray =
             0.299 *
-                red +
+            red +
             0.587 *
-                green +
+            green +
             0.114 *
-                blue;
+            blue;
 
 
         const saturation =
             1 +
             effects.saturation /
-                100;
+            100;
 
 
         red =
@@ -2395,7 +2395,7 @@ function applyPixelEffects(
                 red -
                 gray
             ) *
-                saturation;
+            saturation;
 
         green =
             gray +
@@ -2403,7 +2403,7 @@ function applyPixelEffects(
                 green -
                 gray
             ) *
-                saturation;
+            saturation;
 
         blue =
             gray +
@@ -2411,7 +2411,7 @@ function applyPixelEffects(
                 blue -
                 gray
             ) *
-                saturation;
+            saturation;
 
 
         const warmth =
@@ -2469,14 +2469,14 @@ function applyPixelEffects(
                     width,
                     height
                 ) *
-                    0.23,
+                0.23,
                 width / 2,
                 height / 2,
                 Math.max(
                     width,
                     height
                 ) *
-                    0.68
+                0.68
             );
 
         gradient.addColorStop(
@@ -2486,9 +2486,8 @@ function applyPixelEffects(
 
         gradient.addColorStop(
             1,
-            `rgba(0,0,0,${
-                effects.vignette /
-                170
+            `rgba(0,0,0,${effects.vignette /
+            170
             })`
         );
 
@@ -2524,10 +2523,10 @@ function getTransparentBorderRatio(
         const index =
             (
                 y *
-                    width +
+                width +
                 x
             ) *
-                4 +
+            4 +
             3;
 
         total++;
@@ -2603,7 +2602,7 @@ function getCornerBackgroundColors(
                         width,
                         height
                     ) *
-                        0.035
+                    0.035
                 )
             )
         );
@@ -2626,7 +2625,7 @@ function getCornerBackgroundColors(
                 width,
                 height,
                 width -
-                    patchSize,
+                patchSize,
                 0,
                 patchSize
             ),
@@ -2638,7 +2637,7 @@ function getCornerBackgroundColors(
                 height,
                 0,
                 height -
-                    patchSize,
+                patchSize,
                 patchSize
             ),
 
@@ -2648,9 +2647,9 @@ function getCornerBackgroundColors(
                 width,
                 height,
                 width -
-                    patchSize,
+                patchSize,
                 height -
-                    patchSize,
+                patchSize,
                 patchSize
             ),
     };
@@ -2674,14 +2673,14 @@ function sampleCornerColor(
         Math.min(
             width,
             startX +
-                size
+            size
         );
 
     const endY =
         Math.min(
             height,
             startY +
-                size
+            size
         );
 
 
@@ -2706,15 +2705,15 @@ function sampleCornerColor(
             const index =
                 (
                     y *
-                        width +
+                    width +
                     x
                 ) *
                 4;
 
             const alpha =
                 data[
-                    index +
-                        3
+                index +
+                3
                 ];
 
             if (
@@ -2730,15 +2729,15 @@ function sampleCornerColor(
 
             greens.push(
                 data[
-                    index +
-                        1
+                index +
+                1
                 ]
             );
 
             blues.push(
                 data[
-                    index +
-                        2
+                index +
+                2
                 ]
             );
         }
@@ -2783,19 +2782,19 @@ function getExpectedBackgroundColor(
     const horizontal =
         width > 1
             ? x /
-                (
-                    width -
-                    1
-                )
+            (
+                width -
+                1
+            )
             : 0;
 
     const vertical =
         height > 1
             ? y /
-                (
-                    height -
-                    1
-                )
+            (
+                height -
+                1
+            )
             : 0;
 
 
@@ -2893,26 +2892,26 @@ function getBackgroundDistance(
 
     const green =
         data[
-            index +
-                1
+        index +
+        1
         ] -
         expected.green;
 
     const blue =
         data[
-            index +
-                2
+        index +
+        2
         ] -
         expected.blue;
 
 
     return Math.sqrt(
         red *
-            red +
+        red +
         green *
-            green +
+        green +
         blue *
-            blue
+        blue
     );
 }
 
@@ -2935,21 +2934,21 @@ function median(
     const middle =
         Math.floor(
             sorted.length /
-                2
+            2
         );
 
     if (
         sorted.length %
-            2 ===
+        2 ===
         0
     ) {
         return (
             sorted[
-                middle -
-                    1
+            middle -
+            1
             ] +
             sorted[
-                middle
+            middle
             ]
         ) /
             2;
@@ -2972,7 +2971,7 @@ function lerp(
             end -
             start
         ) *
-            amount
+        amount
     );
 }
 

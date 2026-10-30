@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\Admin\CategoryAiController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\CollectionController;
 use App\Http\Controllers\Api\Admin\GlobalVariantController;
+use App\Http\Controllers\Api\Admin\HomepageSectionController;
+use App\Http\Controllers\Api\Admin\HomepageSliderController;
 use App\Http\Controllers\Api\Admin\Settings\AiImageModelController;
 use App\Http\Controllers\Api\Admin\Settings\AiSettingController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -20,6 +22,11 @@ use App\Http\Controllers\Api\Admin\LocationController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductAiController;
 use App\Http\Controllers\Api\Admin\ProductSeoController;
+use App\Http\Controllers\Api\Storefront\CollectionController as StorefrontCollectionController;
+use App\Http\Controllers\Api\Storefront\HomepageSliderController as StorefrontHomepageSliderController;
+
+use App\Http\Controllers\Api\Storefront\CategoryController as StorefrontCategoryController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -227,3 +234,65 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
         Route::post('/seo/analyze', [ProductSeoController::class, 'analyze']);
     });
 });
+
+
+Route::prefix('collections')->group(function () {
+    Route::get('/', [StorefrontCollectionController::class, 'index']);
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Admin Homepage Sliders
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+        Route::prefix('homepage-sliders')->group(function () {
+            Route::get('/', [HomepageSliderController::class, 'index']);
+            Route::post('/', [HomepageSliderController::class, 'store']);
+            Route::post('/upload-image', [HomepageSliderController::class, 'uploadImage']);
+            Route::delete('/delete-image', [HomepageSliderController::class, 'deleteImage']);
+            Route::get('/{id}', [HomepageSliderController::class, 'show'])->whereNumber('id');
+            Route::put('/{id}', [HomepageSliderController::class, 'update'])->whereNumber('id');
+            Route::delete('/{id}', [HomepageSliderController::class, 'destroy'])->whereNumber('id');
+        });
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Public Homepage Sliders
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('homepage-sliders')->group(function () {
+    Route::get('/', [StorefrontHomepageSliderController::class, 'index']);
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Public Featured Categories
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('categories')->group(function () {
+    Route::get('/featured', [StorefrontCategoryController::class, 'featured']);
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Admin Homepage Sections
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+
+        Route::prefix('homepage-sections')->group(function () {
+            Route::get('/{sectionKey}', [HomepageSectionController::class, 'show']);
+            Route::put('/{sectionKey}', [HomepageSectionController::class, 'update']);
+        });
+        
+    });

@@ -17,7 +17,6 @@ export const getCollections = async (params = {}) => {
     return response.data;
 };
 
-
 /*
 |--------------------------------------------------------------------------
 | Get Single Collection
@@ -31,7 +30,6 @@ export const getCollection = async (id) => {
 
     return response.data;
 };
-
 
 /*
 |--------------------------------------------------------------------------
@@ -47,7 +45,6 @@ export const getOrderedCollections = async () => {
     return response.data;
 };
 
-
 /*
 |--------------------------------------------------------------------------
 | Create Collection
@@ -62,7 +59,6 @@ export const createCollection = async (payload) => {
 
     return response.data;
 };
-
 
 /*
 |--------------------------------------------------------------------------
@@ -82,7 +78,6 @@ export const updateCollection = async (
     return response.data;
 };
 
-
 /*
 |--------------------------------------------------------------------------
 | Delete Collection
@@ -97,13 +92,11 @@ export const deleteCollection = async (id) => {
     return response.data;
 };
 
-
-
-/**
- * |--------------------------------------------------------------------------
- * | Upload Collection Image
- * |--------------------------------------------------------------------------
- */
+/*
+|--------------------------------------------------------------------------
+| Upload Collection Image
+|--------------------------------------------------------------------------
+*/
 
 export const uploadCollectionImage = async (
     file,
@@ -131,12 +124,11 @@ export const uploadCollectionImage = async (
     return response.data;
 };
 
-
-/**
- * |--------------------------------------------------------------------------
- * | Delete Collection Image
- * |--------------------------------------------------------------------------
- */
+/*
+|--------------------------------------------------------------------------
+| Delete Collection Image
+|--------------------------------------------------------------------------
+*/
 
 export const deleteCollectionImage = async (
     path
