@@ -2172,26 +2172,29 @@ const loadReferenceData =
                 }
             />
 
-            <ProductVariantsSection
-                globalVariants={
-                    globalVariants
-                }
-                locations={
-                    locations
-                }
-                selectedGlobalVariants={
-                    selectedGlobalVariants
-                }
-                variants={
-                    variants
-                }
-                onGlobalVariantsChange={
-                    setSelectedGlobalVariants
-                }
-                onVariantsChange={
-                    setVariants
-                }
-            />
+         <ProductVariantsSection
+    globalVariants={
+        globalVariants
+    }
+    locations={
+        locations
+    }
+    media={
+        media
+    }
+    selectedGlobalVariants={
+        selectedGlobalVariants
+    }
+    variants={
+        variants
+    }
+    onGlobalVariantsChange={
+        setSelectedGlobalVariants
+    }
+    onVariantsChange={
+        setVariants
+    }
+/>
 
             <ProductShippingSection
                 form={form}

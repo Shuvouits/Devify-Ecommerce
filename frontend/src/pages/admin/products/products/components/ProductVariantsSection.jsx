@@ -1,15 +1,22 @@
 import {
     Boxes,
     Check,
+    ImageIcon,
     MapPin,
     Plus,
     Trash2,
     X,
 } from "lucide-react";
 
+import {
+    getMediaSource,
+} from "../../../../../utils/mediaUrl";
+
+
 export default function ProductVariantsSection({
     globalVariants = [],
     locations = [],
+    media = [],
     selectedGlobalVariants = [],
     variants = [],
     onGlobalVariantsChange,
@@ -113,7 +120,9 @@ export default function ProductVariantsSection({
             next
         );
 
-        regenerateVariants(next);
+        regenerateVariants(
+            next
+        );
     };
 
     const toggleOption = (
@@ -180,7 +189,9 @@ export default function ProductVariantsSection({
             next
         );
 
-        regenerateVariants(next);
+        regenerateVariants(
+            next
+        );
     };
 
     const getCombinationKey = (
@@ -204,8 +215,8 @@ export default function ProductVariantsSection({
                     Array.isArray(
                         group.option_ids
                     ) &&
-                    group.option_ids
-                        .length > 0
+                    group.option_ids.length >
+                        0
             );
 
         if (
@@ -349,7 +360,9 @@ export default function ProductVariantsSection({
                             ),
 
                         sku: "",
+
                         barcode: "",
+
                         price: "",
 
                         compare_at_price:
@@ -361,7 +374,8 @@ export default function ProductVariantsSection({
                         image_path:
                             null,
 
-                        is_active: true,
+                        is_active:
+                            true,
 
                         display_order:
                             index + 1,
@@ -401,6 +415,7 @@ export default function ProductVariantsSection({
                     index
                         ? {
                               ...variant,
+
                               [field]:
                                   value,
                           }
@@ -503,6 +518,7 @@ export default function ProductVariantsSection({
                         )
                             ? {
                                   ...item,
+
                                   [field]:
                                       value,
                               }
@@ -552,6 +568,23 @@ export default function ProductVariantsSection({
                     variant.id
                 )
         );
+
+    const imageMedia =
+        Array.isArray(media)
+            ? media.filter(
+                  (item) =>
+                      (
+                          item?.media_type ===
+                              "image" ||
+                          !item?.media_type
+                      ) &&
+                      (
+                          item?.file_path ||
+                          item?.external_url ||
+                          item?.url
+                      )
+              )
+            : [];
 
     return (
         <section className="overflow-hidden rounded-[18px] border border-[#e2e4e8] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
@@ -623,9 +656,7 @@ export default function ProductVariantsSection({
 
                         <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[10px] border border-[#d7dce2] bg-[#f8f9fa] text-[#727c88]">
                             <Plus
-                                size={
-                                    15
-                                }
+                                size={15}
                                 strokeWidth={
                                     1.8
                                 }
@@ -803,8 +834,7 @@ export default function ProductVariantsSection({
                     </div>
                 )}
 
-                {variants.length >
-                    0 && (
+                {variants.length > 0 && (
                     <>
                         <div className="my-[17px] h-px bg-[#e8eaed]" />
 
@@ -850,6 +880,9 @@ export default function ProductVariantsSection({
                                         locations={
                                             locations
                                         }
+                                        media={
+                                            imageMedia
+                                        }
                                         getInventory={
                                             getVariantInventory
                                         }
@@ -878,6 +911,7 @@ function VariantCard({
     variant,
     index,
     locations,
+    media,
     getInventory,
     onUpdate,
     onInventoryUpdate,
@@ -936,6 +970,25 @@ function VariantCard({
             </div>
 
             <div className="p-[13px]">
+                <VariantImageSelector
+                    media={media}
+                    value={
+                        variant.image_path ||
+                        ""
+                    }
+                    onChange={(
+                        value
+                    ) =>
+                        onUpdate(
+                            index,
+                            "image_path",
+                            value
+                        )
+                    }
+                />
+
+                <div className="my-[13px] h-px bg-[#edf0f2]" />
+
                 <div className="grid gap-[10px] sm:grid-cols-2 lg:grid-cols-5">
                     <VariantInput
                         label="SKU"
@@ -1031,8 +1084,7 @@ function VariantCard({
                     />
                 </div>
 
-                {locations.length >
-                    0 && (
+                {locations.length > 0 && (
                     <>
                         <div className="my-[13px] h-px bg-[#edf0f2]" />
 
@@ -1155,6 +1207,177 @@ function VariantCard({
                     </>
                 )}
             </div>
+        </div>
+    );
+}
+
+
+function VariantImageSelector({
+    media = [],
+    value,
+    onChange,
+}) {
+    const selected =
+        media.find(
+            (item) =>
+                getMediaValue(
+                    item
+                ) === value
+        ) || null;
+
+    return (
+        <div>
+            <div className="mb-[7px] flex items-center justify-between gap-3">
+                <div>
+                    <p className="text-[10px] font-semibold text-[#5e6874]">
+                        Variant image
+                    </p>
+
+                    <p className="mt-[2px] text-[9px] text-[#929aa5]">
+                        Select the product
+                        image that matches
+                        this variant.
+                    </p>
+                </div>
+
+                {value && (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            onChange(
+                                null
+                            )
+                        }
+                        className="text-[9.5px] font-medium text-[#7d8692] transition hover:text-[#dc2626]"
+                    >
+                        Clear image
+                    </button>
+                )}
+            </div>
+
+            {media.length === 0 ? (
+                <div className="flex h-[62px] items-center gap-[9px] rounded-[9px] border border-dashed border-[#d7dce2] bg-[#fafbfc] px-[11px]">
+                    <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[8px] bg-white text-[#8b95a1] shadow-sm ring-1 ring-[#e5e7eb]">
+                        <ImageIcon
+                            size={15}
+                        />
+                    </div>
+
+                    <div>
+                        <p className="text-[10px] font-medium text-[#5d6671]">
+                            No product images
+                        </p>
+
+                        <p className="mt-[1px] text-[9px] text-[#969ea8]">
+                            Upload images in
+                            the Media section
+                            first.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex flex-wrap gap-[8px]">
+                    {media.map(
+                        (item) => {
+                            const mediaValue =
+                                getMediaValue(
+                                    item
+                                );
+
+                            const source =
+                                getMediaSource(
+                                    item
+                                );
+
+                            const isSelected =
+                                value ===
+                                mediaValue;
+
+                            return (
+                                <button
+                                    key={
+                                        item.id ||
+                                        mediaValue
+                                    }
+                                    type="button"
+                                    onClick={() =>
+                                        onChange(
+                                            mediaValue
+                                        )
+                                    }
+                                    title={
+                                        item.alt_text ||
+                                        "Select variant image"
+                                    }
+                                    className={[
+                                        "relative",
+                                        "flex",
+                                        "h-[64px]",
+                                        "w-[64px]",
+                                        "items-center",
+                                        "justify-center",
+                                        "overflow-hidden",
+                                        "rounded-[9px]",
+                                        "border",
+                                        "bg-[#f7f8f9]",
+                                        "p-[4px]",
+                                        "transition",
+                                        isSelected
+                                            ? "border-[#316ff4] ring-2 ring-[#316ff4]/15"
+                                            : "border-[#dce1e6] hover:border-[#aeb8c4]",
+                                    ].join(
+                                        " "
+                                    )}
+                                >
+                                    <img
+                                        src={
+                                            source ||
+                                            ""
+                                        }
+                                        alt={
+                                            item.alt_text ||
+                                            "Product"
+                                        }
+                                        className="h-full w-full object-contain"
+                                    />
+
+                                    {isSelected && (
+                                        <span className="absolute right-[4px] top-[4px] flex h-[16px] w-[16px] items-center justify-center rounded-full bg-[#316ff4] text-white shadow-sm">
+                                            <Check
+                                                size={
+                                                    10
+                                                }
+                                                strokeWidth={
+                                                    2.5
+                                                }
+                                            />
+                                        </span>
+                                    )}
+
+                                    {item.is_cover && (
+                                        <span className="absolute bottom-[3px] left-[3px] rounded-[4px] bg-[#252b35]/85 px-[4px] py-[1px] text-[7px] font-semibold text-white">
+                                            Cover
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        }
+                    )}
+                </div>
+            )}
+
+            {selected && (
+                <p className="mt-[6px] text-[9px] text-[#7e8792]">
+                    Selected image:{" "}
+                    <span className="font-medium text-[#505966]">
+                        {selected.alt_text ||
+                            selected.file_path
+                                ?.split("/")
+                                .pop() ||
+                            "Product image"}
+                    </span>
+                </p>
+            )}
         </div>
     );
 }
@@ -1284,5 +1507,17 @@ function TableHeader({
         <span className="text-[8.5px] font-semibold uppercase tracking-[0.04em] text-[#838d98]">
             {children}
         </span>
+    );
+}
+
+
+function getMediaValue(
+    item
+) {
+    return (
+        item?.file_path ||
+        item?.external_url ||
+        item?.url ||
+        null
     );
 }

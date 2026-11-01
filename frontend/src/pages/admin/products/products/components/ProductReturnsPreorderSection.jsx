@@ -132,22 +132,69 @@ export default function ProductReturnsPreorderSection({
                                     }
                                 />
 
-                                <Field
-                                    label="Pre-order limit"
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    value={
-                                        form.preorder_limit
-                                    }
-                                    placeholder="0"
-                                    onChange={(value) =>
-                                        onChange(
-                                            "preorder_limit",
-                                            value
-                                        )
-                                    }
-                                />
+                              
+                              <div>
+    <label className="mb-[6px] block text-[10.5px] font-medium text-[#454f5b]">
+        Deposit value
+    </label>
+
+    <div className="relative">
+        {form.preorder_deposit_type === "fixed" && (
+            <span className="pointer-events-none absolute left-[10px] top-1/2 -translate-y-1/2 text-[10.5px] text-[#7c8590]">
+                $
+            </span>
+        )}
+
+        <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.preorder_deposit_value ?? ""}
+            onChange={(event) =>
+                onChange(
+                    "preorder_deposit_value",
+                    event.target.value
+                )
+            }
+            placeholder={
+                form.preorder_deposit_type === "percentage"
+                    ? "e.g. 25"
+                    : "0.00"
+            }
+            className={[
+                "h-[36px]",
+                "w-full",
+                "rounded-[9px]",
+                "border",
+                "border-[#ccd3dc]",
+                "bg-white",
+                "pr-[30px]",
+                "text-[10.5px]",
+                "text-[#303945]",
+                "outline-none",
+                "transition",
+                "placeholder:text-[#9da5af]",
+                "focus:border-[#7da0f8]",
+                "focus:ring-2",
+                "focus:ring-[#eef3ff]",
+                form.preorder_deposit_type === "fixed"
+                    ? "pl-[25px]"
+                    : "pl-[10px]",
+            ].join(" ")}
+        />
+
+        {form.preorder_deposit_type === "percentage" && (
+            <span className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2 text-[10.5px] text-[#7c8590]">
+                %
+            </span>
+        )}
+    </div>
+</div>
+
+
+
+
+
                             </div>
 
                             <p className="mt-[4px] text-right text-[8.5px] text-[#929aa4]">

@@ -1,15 +1,8 @@
 import axios from "axios";
 
-
-/*
-|--------------------------------------------------------------------------
-| API BASE URL
-|--------------------------------------------------------------------------
-*/
-
-const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL ||
-    "http://127.0.0.1:8000/api";
+import {
+    API_BASE_URL,
+} from "../config/app";
 
 
 /*
@@ -39,7 +32,9 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token =
-            localStorage.getItem("token");
+            localStorage.getItem(
+                "token"
+            );
 
         if (token) {
             config.headers.Authorization =
@@ -49,14 +44,18 @@ api.interceptors.request.use(
         if (
             config.data instanceof FormData
         ) {
-            delete config.headers["Content-Type"];
+            delete config.headers[
+                "Content-Type"
+            ];
         }
 
         return config;
     },
 
     (error) => {
-        return Promise.reject(error);
+        return Promise.reject(
+            error
+        );
     }
 );
 
@@ -90,7 +89,9 @@ const refreshAccessToken =
                         {},
                         {
                             headers: {
-                                Accept: "application/json",
+                                Accept:
+                                    "application/json",
+
                                 Authorization:
                                     `Bearer ${token}`,
                             },
@@ -165,12 +166,6 @@ api.interceptors.response.use(
             originalRequest &&
             !originalRequest._retry
         ) {
-            /*
-            |--------------------------------------------------------------------------
-            | Do not refresh these authentication requests
-            |--------------------------------------------------------------------------
-            */
-
             const excludedRoutes = [
                 "/auth/login",
                 "/auth/register",
@@ -219,7 +214,9 @@ api.interceptors.response.use(
             }
         }
 
-        return Promise.reject(error);
+        return Promise.reject(
+            error
+        );
     }
 );
 

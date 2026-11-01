@@ -1,10 +1,10 @@
 import HomepageSlider from "../../components/frontend/home/HomepageSlider";
 import FeaturedCategories from "../../components/frontend/home/FeaturedCategories";
+import ProductsOnSale from "../../components/frontend/home/ProductsOnSale";
 
 const Home = () => {
     return (
         <main className="mx-auto min-h-screen w-full max-w-[1300px] bg-white">
-
             {/* Section 1: Homepage Hero Slider */}
             <HomepageSlider />
 
@@ -12,14 +12,13 @@ const Home = () => {
             <FeaturedCategories />
 
             {/* Section 3: Products on Sale */}
-            {/* <ProductsOnSale /> */}
+            <ProductsOnSale />
 
             {/* Section 4: Featured Products */}
             {/* <FeaturedProducts /> */}
 
             {/* Section 5: New Arrivals */}
             {/* <NewArrivals /> */}
-
         </main>
     );
 };

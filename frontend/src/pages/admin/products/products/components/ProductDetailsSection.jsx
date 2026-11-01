@@ -3,23 +3,13 @@ import {
 } from "react";
 
 import {
-    AlignLeft,
-    Bold,
-    Code2,
-    Italic,
-    Link2,
-    List,
-    ListOrdered,
-    Minus,
     Plus,
-    Quote,
-    Redo2,
     Sparkles,
-    Strikethrough,
     Trash2,
-    Underline,
-    Undo2,
 } from "lucide-react";
+import ProductDescriptionEditor from "../../form/components/editor/ProductDescriptionEditor";
+
+
 
 
 export default function ProductDetailsSection({
@@ -318,123 +308,20 @@ export default function ProductDetailsSection({
                             </button>
                         </div>
 
-                        <div className="overflow-hidden rounded-[11px] border border-[#d5d9df] bg-white focus-within:border-[#aeb7c2]">
-                            {/* Toolbar */}
+                       
+                       <ProductDescriptionEditor
+    value={form.description}
+    onChange={(value) =>
+        onChange(
+            "description",
+            value
+        )
+    }
+/>
 
-                            <div className="flex flex-wrap items-center gap-[2px] border-b border-[#e6e8eb] px-[7px] py-[6px]">
-                                <ToolbarButton
-                                    icon={
-                                        Undo2
-                                    }
-                                />
 
-                                <ToolbarButton
-                                    icon={
-                                        Redo2
-                                    }
-                                />
 
-                                <Divider />
 
-                                <TextButton>
-                                    H1
-                                </TextButton>
-
-                                <TextButton>
-                                    H2
-                                </TextButton>
-
-                                <TextButton>
-                                    H3
-                                </TextButton>
-
-                                <TextButton>
-                                    ¶
-                                </TextButton>
-
-                                <Divider />
-
-                                <ToolbarButton
-                                    icon={
-                                        Bold
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        Italic
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        Underline
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        Strikethrough
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        Code2
-                                    }
-                                />
-
-                                <Divider />
-
-                                <ToolbarButton
-                                    icon={
-                                        List
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        ListOrdered
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        Quote
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        AlignLeft
-                                    }
-                                />
-
-                                <ToolbarButton
-                                    icon={
-                                        Link2
-                                    }
-                                />
-                            </div>
-
-                            <textarea
-                                value={
-                                    form.description
-                                }
-                                onChange={(
-                                    event
-                                ) =>
-                                    onChange(
-                                        "description",
-                                        event.target
-                                            .value
-                                    )
-                                }
-                                rows={9}
-                                placeholder="Write a detailed product description..."
-                                className="min-h-[150px] w-full resize-y border-0 bg-white px-[12px] py-[11px] text-[11.5px] leading-[18px] text-[#303945] outline-none placeholder:text-[#929aa4]"
-                            />
-                        </div>
                     </div>
                 )}
 

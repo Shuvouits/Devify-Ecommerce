@@ -40,6 +40,9 @@ use Illuminate\Support\ServiceProvider;
 use App\Repositories\Storefront\HomepageSliderRepository as StorefrontHomepageSliderRepository;
 use App\Repositories\Storefront\HomepageSliderRepositoryInterface as StorefrontHomepageSliderRepositoryInterface;
 
+use App\Repositories\Storefront\ProductRepository as StorefrontProductRepository;
+use App\Repositories\Storefront\ProductRepositoryInterface as StorefrontProductRepositoryInterface;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -126,6 +129,13 @@ class AppServiceProvider extends ServiceProvider
             HomepageSectionRepositoryInterface::class,
             HomepageSectionRepository::class
         );
+
+        $this->app->bind(
+    StorefrontProductRepositoryInterface::class,
+    StorefrontProductRepository::class
+);
+
+
     }
 
     /**

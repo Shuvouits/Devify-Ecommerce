@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Storefront\CollectionController as StorefrontCollec
 use App\Http\Controllers\Api\Storefront\HomepageSliderController as StorefrontHomepageSliderController;
 
 use App\Http\Controllers\Api\Storefront\CategoryController as StorefrontCategoryController;
+use App\Http\Controllers\Api\Storefront\ProductController as StorefrontProductController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -294,5 +295,17 @@ Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function (
             Route::get('/{sectionKey}', [HomepageSectionController::class, 'show']);
             Route::put('/{sectionKey}', [HomepageSectionController::class, 'update']);
         });
-        
+
     });
+
+
+/*
+|--------------------------------------------------------------------------
+| Public Storefront Products
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('products')->group(function () {
+    Route::get('/on-sale', [StorefrontProductController::class, 'onSale']);
+    Route::get('/{id}/quick-view', [StorefrontProductController::class, 'quickView'])->whereNumber('id');
+});
